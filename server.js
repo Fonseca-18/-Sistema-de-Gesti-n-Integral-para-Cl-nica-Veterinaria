@@ -47,20 +47,38 @@ app.post("/registro", (req, res) => {
 app.post("/iniciosesion", (req, res) => {
     const { usuario, clave } = req.body;
 
-    const sql = "SELECT * FROM clientes WHERE usuario = ? AND clave = ?";
-    db.query(sql, [usuario, clave], (err, results) => {
-        if (err) {
-            console.error("❌ Error al verificar login:", err);
-            res.status(500).send("Error en el servidor");
-            return;
-        }
+    // Primero clientes
+    const sqlCliente = "SELECT * FROM clientes WHERE usuario = ? AND clave = ?";
+    db.query(sqlCliente, [usuario, clave], (err, clientes) => {
+        if (err) return res.status(500).send("Error en el servidor");
 
-        if (results.length > 0) {
-            console.log("✅ Login exitoso:", results[0].usuario);
-            res.redirect("/menus/usuario.html"); // ✅ Ahora redirige a usuario.html dentro de /menus
+        if (clientes.length > 0) {
+            return res.redirect("/menus/usuario.html");
         } else {
-            console.log("❌ Intento de login fallido");
-            res.send("Usuario o contraseña incorrectos. <a href='/login.html'>Volver</a>");
+            // Ahora empleados
+            const sqlEmpleado = `
+                SELECT e.*, r.nombre_rol 
+                FROM empleados e 
+                JOIN roles r ON e.id_rol = r.id_rol 
+                WHERE e.usuario = ? AND e.clave = ?
+            `;
+            db.query(sqlEmpleado, [usuario, clave], (err, empleados) => {
+                if (err) return res.status(500).send("Error en el servidor");
+
+                if (empleados.length > 0) {
+                    const empleado = empleados[0];
+                    
+                    if (empleado.nombre_rol === "admin") {
+                        return res.redirect("/menus/admin.html");
+                    } else if (empleado.nombre_rol === "veterinario") {
+                        return res.redirect("/menus/veterinario.html");
+                    } else {
+                        return res.send("Acceso restringido. <a href='/login.html'>Volver</a>");
+                    }
+                } else {
+                    return res.send("Usuario o contraseña incorrectos. <a href='/login.html'>Volver</a>");
+                }
+            });
         }
     });
 });

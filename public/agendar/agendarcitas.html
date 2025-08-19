@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agendamiento de citas</title>
+</head>
+<body>
+    <h1>Bienvenido al módulo de agendamiento de citas</h1>
+
+    <form action="/agendarCita" method="POST">
+
+        <!-- Selección de servicio -->
+        <label for="servicio">Selecciona un servicio:</label>
+        <select name="id_servicio" id="servicio" required onchange="actualizarPrecio()">
+            <option value="">Selecciona un servicio</option>
+            <option value="1">Consulta general</option>
+            <option value="2">Vacunación</option>
+            <option value="3">Desparasitación</option>
+            <option value="4">Baño y peluquería</option>
+            <option value="5">Cirugía menor</option>
+            <option value="6">Exámenes de laboratorio</option>
+            <option value="7">Radiografía</option>
+            <option value="8">Control de peso y nutrición</option>
+            <option value="9">Odontología veterinaria</option>
+            <option value="10">Hospitalización</option>
+        </select>
+
+        <!-- Mostrar precio dinámico -->
+        <label>Precio del servicio: $<span id="precioServicio">0</span></label>
+
+        <!-- Fecha y hora -->
+        <label for="fecha_hora">Fecha y hora de la cita:</label>
+        <input type="datetime-local" name="fecha_hora" id="fecha_hora" required>
+
+        <!-- Recordatorio -->
+        <label>¿Desea recordatorio del servicio?</label>
+        <input type="radio" name="recordatorio" value="si" onclick="mostrarIntervalo(true)"> Sí
+        <input type="radio" name="recordatorio" value="no" onclick="mostrarIntervalo(false)" checked> No
+
+        <!-- Intervalo del servicio -->
+        <div id="intervaloServicio" style="display: none;">
+            <label for="intervalo">Cada cuánto tiempo se debe realizar el servicio:</label>
+            <select name="intervalo" id="intervalo">
+                <option value=""> Selecciona el intervalo </option>
+                <option value="1 semana">1 semana</option>
+                <option value="2 semanas">2 semanas</option>
+                <option value="1 mes">1 mes</option>
+                <option value="3 meses">3 meses</option>
+                <option value="6 meses">6 meses</option>
+                <option value="1 año">1 año</option>
+            </select>
+        </div>
+
+        <!-- Botón para enviar -->
+        <button type="submit">Guardar Cita</button>
+    </form>
+
+    <script>
+        // Mostrar/ocultar intervalo según recordatorio
+        function mostrarIntervalo(mostrar) {
+            document.getElementById('intervaloServicio').style.display = mostrar ? 'block' : 'none';
+        }
+
+        // Actualizar el precio según el servicio seleccionado
+        function actualizarPrecio() {
+            const servicioSelect = document.getElementById('servicio');
+            const precioSpan = document.getElementById('precioServicio');
+            let precio = 0;
+            switch(servicioSelect.value) {
+                case "1": precio = 50000; break;
+                case "2": precio = 30000; break;
+                case "3": precio = 40000; break;
+                case "4": precio = 25000; break;
+                case "5": precio = 100000; break;
+                case "6": precio = 70000; break;
+                case "7": precio = 60000; break;
+                case "8": precio = 35000; break;
+                case "9": precio = 80000; break;
+                case "10": precio = 120000; break;
+            }
+            precioSpan.textContent = precio;
+        }
+    </script>
+
+    <a href="javascript:history.back()">Regresar</a>
+</body>
+</html>
