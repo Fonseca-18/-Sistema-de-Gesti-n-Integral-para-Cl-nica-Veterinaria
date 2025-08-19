@@ -103,3 +103,11 @@ CREATE TABLE notificaciones (
 );
 
 select * from clientes;
+
+INSERT INTO roles (nombre_rol) VALUES ('admin');
+INSERT INTO roles (nombre_rol) VALUES ('veterinario');
+
+SELECT * FROM roles;
+
+INSERT INTO empleados (nombre_completo, usuario, clave, correo, telefono, id_rol)
+VALUES ('Juan Perez', 'admin1', '1234', 'juan@example.com', '3001234567', 1);
