@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agregar Mascota</title>
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+    <h1>Agregar mascota</h1>
+    <form id="formMascota">
+        <input type="text" name="nombre" placeholder="Nombre" required>
+        <input type="text" name="especie" placeholder="Especie" required>
+        <input type="text" name="raza" placeholder="Raza">
+        <input type="text" name="color" placeholder="Color">
+        
+        <!-- Tamaño -->
+        <select name="tamano" required>
+            <option value="">Seleccione Tamaño</option>
+            <option value="Pequeño">Pequeño</option>
+            <option value="Mediano">Mediano</option>
+            <option value="Grande">Grande</option>
+        </select>
+        
+        <!-- Año de nacimiento -->
+        <input type="number" name="anio_nacimiento" placeholder="Año de nacimiento" min="2000" max="2025" required>
+        
+        <button type="button" onclick="history.back()">Regresar</button>
+        <button type="submit">Agregar</button>
+    </form>
+
+    <script>
+    document.getElementById("formMascota").addEventListener("submit", async function(event) {
+        event.preventDefault();
+
+        // Convertir datos del formulario en JSON
+        const form = event.target;
+        const data = Object.fromEntries(new FormData(form));
+
+        try {
+            const response = await fetch("/agregar_mascota", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(data)
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                Swal.fire({
+                    title: "Veterinaria UC",
+                    text: result.message,
+                    icon: "success",
+                    confirmButtonText: "Aceptar"
+                }).then(() => {
+                    window.location.href = "/menus/usuario.html";
+                });
+            } else {
+                Swal.fire({
+                    title: "Veterinaria UC",
+                    text: result.error,
+                    icon: "error",
+                    confirmButtonText: "Intentar de nuevo"
+                });
+            }
+        } catch (error) {
+            Swal.fire({
+                title: "Veterinaria UC",
+                text: "❌ Error de conexión con el servidor",
+                icon: "error",
+                confirmButtonText: "OK"
+            });
+        }
+    });
+    </script>
+</body>
+</html>

@@ -111,3 +111,32 @@ SELECT * FROM roles;
 
 INSERT INTO empleados (nombre_completo, usuario, clave, correo, telefono, id_rol)
 VALUES ('Juan Perez', 'admin1', '1234', 'juan@example.com', '3001234567', 1);
+
+ALTER TABLE clientes
+ADD cedula VARCHAR(20) NULL AFTER id_cliente;
+
+UPDATE clientes SET cedula = '1000123456' WHERE id_cliente = 1;
+UPDATE clientes SET cedula = '1000234567' WHERE id_cliente = 2;
+UPDATE clientes SET cedula = '1000345678' WHERE id_cliente = 3;
+UPDATE clientes SET cedula = '1000456789' WHERE id_cliente = 4;
+
+ALTER TABLE clientes
+MODIFY cedula VARCHAR(20) NOT NULL UNIQUE;
+
+select * from mascotas;
+
+CREATE TABLE citas (
+    id_cita INT AUTO_INCREMENT PRIMARY KEY,
+    id_cliente INT NOT NULL,
+    id_mascota INT NOT NULL,
+    id_servicio INT NOT NULL,
+    fecha_hora DATETIME NOT NULL,
+    recordatorio ENUM('si','no') DEFAULT 'no',
+    intervalo VARCHAR(20),
+    creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_cliente) REFERENCES clientes(id_cliente) ON DELETE CASCADE,
+    FOREIGN KEY (id_mascota) REFERENCES mascotas(id_mascota) ON DELETE CASCADE,
+    FOREIGN KEY (id_servicio) REFERENCES servicios(id_servicio)
+);
+
+select * from citas;
