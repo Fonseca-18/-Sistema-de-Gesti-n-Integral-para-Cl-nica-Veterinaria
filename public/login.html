@@ -1,17 +1,49 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+    <link rel="stylesheet" href="styles_logreg.css">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inicio de Sesión</title>
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <style>
+        /* Ocultar captcha pero mantener espacio y alineación */
+        #captchaBox {
+            display: none;
+            margin: 15px auto;
+            text-align: center;
+        }
+    </style>
 </head>
 <body>
-    <h1>Formulario de inicio de sesión</h1>
-    <form action="/iniciosesion" method="POST">
-        <input type="text" name="usuario" placeholder="Usuario" required>
-        <input type="password" name="clave" placeholder="Contraseña" required>
-        <button type="submit">Entrar</button>
-    </form>
-    <a href="javascript:history.back()">Regresar</a>
+    <div class="contenedor-log">
+        <div class="titulo-log">
+            <h1>Inicio de Sesión</h1>
+        </div>
+        <div class="contenedor-form">
+            <form action="/iniciosesion" method="POST">
+                <input type="text" name="usuario" placeholder="Usuario" required>
+                <input type="password" name="clave" placeholder="Contraseña" required>
+
+                <!-- Captcha dinámico -->
+                <div id="captchaBox">
+                    <div class="g-recaptcha" data-sitekey="6LdYe8ErAAAAACXX3Pdqr7ydHxoiszDtmOT0d2r8"></div>
+                </div>
+
+                <div class="botones">
+                    <a href="javascript:history.back()" class="boton boton-regresar">Regresar</a>
+                    <button type="submit" class="boton boton-entrar">Entrar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Mostrar captcha si hay ?captcha=1 en la URL
+        const params = new URLSearchParams(window.location.search);
+        if (params.get("captcha") === "1") {
+            document.getElementById("captchaBox").style.display = "block";
+        }
+    </script>
 </body>
 </html>

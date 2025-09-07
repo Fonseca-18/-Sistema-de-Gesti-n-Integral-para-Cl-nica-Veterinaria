@@ -1,22 +1,31 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+    <link rel="stylesheet" href="styles_logreg.css">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registro</title>
 </head>
 <body>
-    <h1>Formulario de Registro</h1>
-    <form action="/registro" method="POST">
-        <input type="text" name="cedula" placeholder="Cédula" required>
-        <input type="text" name="nombre_completo" placeholder="Nombre Completo" required>
-        <input type="text" name="usuario" placeholder="Usuario" required>
-        <input type="password" name="clave" placeholder="Contraseña" required>
-        <input type="email" name="correo" placeholder="Correo" required>
-        <input type="tel" name="telefono" placeholder="Telefono" required>
-        <input type="text" name="direccion" placeholder="Direccion" required>
-        <button type="submit">Guardar</button>
-    </form>
-    <a href="javascript:history.back()">Regresar</a>
+    <div class="contenedor-reg">
+        <div class="titulo-reg">
+            <h1>Registro</h1>
+        </div>
+        <div class="contenedor-form">
+            <form action="/registro" method="POST">
+                <input type="text" name="cedula" placeholder="Cédula" required>
+                <input type="text" name="nombre_completo" placeholder="Nombre Completo" required>
+                <input type="text" name="usuario" placeholder="Usuario" required>
+                <input type="password" name="clave" placeholder="Contraseña" required>
+                <input type="email" name="correo" placeholder="Correo" required>
+                <input type="tel" name="telefono" placeholder="Telefono" required>
+                <input type="text" name="direccion" placeholder="Direccion" required>
+                <div class="botones">
+                    <a href="javascript:history.back()" class="boton boton-regresar">Regresar</a>
+                    <button type="submit" class="boton boton-guardar">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
 </body>
 </html>

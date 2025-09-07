@@ -1,0 +1,69 @@
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow: hidden;
+}
+
+body {
+    background: linear-gradient(#000c, transparent, #0009), url("/Imagenes/fondo.png");
+    color: rgb(237, 230, 228);
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+    font-family: Georgia, "Times New Roman", Times, serif;
+}
+
+.contenedor-index {
+    text-align: center;
+    padding-top: 50px;
+}
+
+.titulo-index {
+    font-size: 50px;
+    letter-spacing: 9px;
+    margin: 0;
+    text-shadow: 2px 2px 6px black;
+}
+
+.imagen-index {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 120px;
+    margin-top: 80px;
+}
+
+.caja-img {
+    flex: 0 0 auto;
+}
+
+.img-ini, 
+.img-reg {
+    width: 320px;
+    height: auto;
+    margin-top: 100px;
+    display: block;
+    cursor: pointer;
+    transition: 0.3s ease;
+    border-radius: 10px;
+}
+
+/* Estilos individuales */
+.img-ini {
+    filter: drop-shadow(0 0 15px green);
+}
+
+.img-ini:hover {
+    transform: scale(1.05);
+    filter: drop-shadow(0 0 25px limegreen);
+}
+
+.img-reg {
+    filter: drop-shadow(0 0 15px red);
+}
+
+.img-reg:hover {
+    transform: scale(1.05);
+    filter: drop-shadow(0 0 25px crimson);
+}
