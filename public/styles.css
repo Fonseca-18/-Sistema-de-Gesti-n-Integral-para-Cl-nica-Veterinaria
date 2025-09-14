@@ -49,7 +49,6 @@ body {
     border-radius: 10px;
 }
 
-/* Estilos individuales */
 .img-ini {
     filter: drop-shadow(0 0 15px green);
 }
