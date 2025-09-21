@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Editar Mascota</title>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+  <h1>Editar Mascota</h1>
+  <form id="formEditarMascota">
+    <input type="hidden" id="id_mascota" name="id_mascota">
+
+    <label>Nombre:</label>
+    <input type="text" id="nombre" name="nombre"><br>
+
+    <label>Especie:</label>
+    <input type="text" id="especie" name="especie"><br>
+
+    <label>Raza:</label>
+    <input type="text" id="raza" name="raza"><br>
+
+    <label>Color:</label>
+    <input type="text" id="color" name="color"><br>
+
+    <label>Tamaño:</label>
+    <input type="text" id="tamano" name="tamano"><br>
+
+    <label>Año Nacimiento:</label>
+    <input type="number" id="anio_nacimiento" name="anio_nacimiento"><br>
+
+    <button type="submit">Guardar Cambios</button>
+  </form>
+
+  <br>
+  <button onclick="window.location.href='/ver/vermascota.html'">⬅ Regresar</button>
+
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const idMascota = urlParams.get("id");
+
+    async function cargarMascota() {
+      try {
+        const response = await fetch(`/api/mascotas/${idMascota}`);
+        if (!response.ok) throw new Error("Mascota no encontrada");
+
+        const mascota = await response.json();
+        document.getElementById("id_mascota").value = mascota.id_mascota;
+        document.getElementById("nombre").value = mascota.nombre;
+        document.getElementById("especie").value = mascota.especie;
+        document.getElementById("raza").value = mascota.raza;
+        document.getElementById("color").value = mascota.color;
+        document.getElementById("tamano").value = mascota.tamano;
+        document.getElementById("anio_nacimiento").value = mascota.anio_nacimiento;
+
+      } catch (err) {
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "Mascota no encontrada"
+        }).then(() => {
+          window.location.href = "/ver/vermascota.html";
+        });
+      }
+    }
+
+    document.getElementById("formEditarMascota").addEventListener("submit", async function (e) {
+      e.preventDefault();
+      const data = {
+        nombre: document.getElementById("nombre").value,
+        especie: document.getElementById("especie").value,
+        raza: document.getElementById("raza").value,
+        color: document.getElementById("color").value,
+        tamano: document.getElementById("tamano").value,
+        anio_nacimiento: document.getElementById("anio_nacimiento").value
+      };
+
+      try {
+        const response = await fetch(`/api/mascotas/${idMascota}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data)
+        });
+
+        if (!response.ok) throw new Error("Error al actualizar");
+
+        Swal.fire({
+          icon: "success",
+          title: "Éxito",
+          text: "Mascota actualizada con éxito"
+        }).then(() => {
+          window.location.href = "/ver/vermascota.html";
+        });
+
+      } catch (err) {
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "No se pudo actualizar la mascota"
+        });
+      }
+    });
+
+    window.onload = cargarMascota;
+  </script>
+</body>
+</html>

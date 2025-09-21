@@ -109,18 +109,16 @@ app.post("/iniciosesion", async (req, res) => {
         }
 
         try {
-            // Enviar como application/x-www-form-urlencoded
             const params = new URLSearchParams();
             params.append("secret", "6LdYe8ErAAAAAODN6EjGHm7D-D6iPjoqCVpBtBrm");  
             params.append("response", captchaToken);
-            params.append("remoteip", req.ip); // opcional
+            params.append("remoteip", req.ip);
 
             const { data } = await axios.post(
                 "https://www.google.com/recaptcha/api/siteverify",
                 params
             );
 
-            // Log en consola para depuración
             console.log("reCAPTCHA verify:", data);
 
             if (!data.success) {
@@ -152,7 +150,7 @@ app.post("/iniciosesion", async (req, res) => {
 
         if (clientes.length > 0) {
             req.session.id_cliente = clientes[0].id_cliente;
-            req.session.intentos = 0; // resetear intentos
+            req.session.intentos = 0;
 
             return res.send(`
 <!DOCTYPE html>
@@ -286,55 +284,340 @@ app.post("/agregar_mascota", (req, res) => {
     });
 });
 
+// --------- ENDPOINTS para llenar selects dinámicos ---------
+app.get("/api/mascotas", (req, res) => {
+    if (!req.session.id_cliente) return res.json([]);
+    const sql = "SELECT id_mascota, nombre, especie, raza FROM mascotas WHERE id_cliente = ?";
+    db.query(sql, [req.session.id_cliente], (err, rows) => {
+        if (err) {
+            console.error("❌ Error al obtener mascotas:", err);
+            return res.status(500).json([]);
+        }
+        res.json(rows);
+    });
+});
+
+app.get("/api/servicios", (req, res) => {
+    const sql = "SELECT id_servicio, nombre_servicio, tarifa FROM servicios";
+    db.query(sql, (err, rows) => {
+        if (err) {
+            console.error("❌ Error al obtener servicios:", err);
+            return res.status(500).json([]);
+        }
+        res.json(rows);
+    });
+});
+
+app.get("/api/veterinarios", (req, res) => {
+    const sql = "SELECT id_empleado, nombre_completo, especialidad FROM empleados WHERE id_rol = 2";
+    db.query(sql, (err, rows) => {
+        if (err) {
+            console.error("❌ Error al obtener veterinarios:", err);
+            return res.status(500).json([]);
+        }
+        res.json(rows);
+    });
+});
+
 // ------------------- AGENDAR CITA -------------------
 app.post("/agendarCita", (req, res) => {
-    const { id_servicio, fecha_hora, recordatorio, intervalo } = req.body;
+    const { id_mascota, id_servicio, id_empleado, fecha_hora, recordatorio, intervalo } = req.body;
 
-    if (!req.session.user) {
-        return res.send("<script>alert('Debes iniciar sesión'); window.location.href='/login.html';</script>");
+    // Validar sesión del cliente
+    if (!req.session.id_cliente) {
+        return res.send(`
+            <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+            <script>
+                Swal.fire({
+                    icon: "warning",
+                    title: "Veterinaria UC",
+                    text: "Debes iniciar sesión para agendar una cita",
+                    confirmButtonText: "Iniciar sesión"
+                }).then(() => window.location.href = "/login.html");
+            </script>
+        `);
     }
 
-    const id_cliente = req.session.user.id_cliente;
+    const id_cliente = req.session.id_cliente;
 
-    const sql = "INSERT INTO citas (id_cliente, id_servicio, fecha_hora, recordatorio, intervalo) VALUES (?, ?, ?, ?, ?)";
-    db.query(sql, [id_cliente, id_servicio, fecha_hora, recordatorio, intervalo], (err, result) => {
+    const sql = `
+        INSERT INTO citas (id_cliente, id_mascota, id_servicio, id_veterinario, fecha_hora, recordatorio, intervalo)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+    `;
+
+    db.query(sql, [id_cliente, id_mascota, id_servicio, id_empleado, fecha_hora, recordatorio, intervalo], (err) => {
         if (err) {
             console.error("❌ Error al registrar cita:", err);
+            return res.send(`
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+    <script>
+        Swal.fire({
+            icon: "error",
+            title: "Veterinaria UC",
+            text: "❌ Error al registrar la cita",
+            confirmButtonText: "Intentar de nuevo"
+        }).then(() => {
+            window.location.href = "/agendar_cita.html";
+        });
+    </script>
+</body>
+</html>
+            `);
+        }
+
+        // ✅ Mensaje emergente como el de inicio de sesión
+        res.send(`
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+    <script>
+        Swal.fire({
+            icon: "success",
+            title: "Veterinaria UC",
+            text: "✅ Cita registrada con éxito",
+            confirmButtonText: "Ir al menú"
+        }).then(() => {
+            window.location.href = "/menus/usuario.html";
+        });
+    </script>
+</body>
+</html>
+        `);
+    });
+});
+
+// ------------------- VER CITAS DEL CLIENTE -------------------
+app.get("/api/citas", (req, res) => {
+    if (!req.session.id_cliente) {
+        return res.status(401).json({ error: "No has iniciado sesión" });
+    }
+
+    const sql = `
+        SELECT 
+            c.id_cita,
+            m.nombre AS mascota,
+            s.nombre_servicio AS servicio,
+            e.nombre_completo AS veterinario,
+            DATE_FORMAT(c.fecha_hora, '%Y-%m-%d') AS fecha,
+            DATE_FORMAT(c.fecha_hora, '%H:%i') AS hora,
+            c.recordatorio,
+            c.intervalo
+        FROM citas c
+        JOIN mascotas m ON c.id_mascota = m.id_mascota
+        JOIN servicios s ON c.id_servicio = s.id_servicio
+        JOIN empleados e ON c.id_veterinario = e.id_empleado
+        WHERE c.id_cliente = ?
+        ORDER BY c.fecha_hora DESC
+    `;
+
+    db.query(sql, [req.session.id_cliente], (err, rows) => {
+        if (err) {
+            console.error("❌ Error al obtener citas:", err);
+            return res.status(500).json({ error: "Error al obtener citas" });
+        }
+        res.json(rows);
+    });
+});
+
+// ------------------- OBTENER DATOS DEL CLIENTE -------------------
+app.get("/api/cliente", (req, res) => {
+    if (!req.session.id_cliente) {
+        return res.status(401).json({ error: "No has iniciado sesión" });
+    }
+
+    const sql = `SELECT id_cliente, cedula, nombre_completo, usuario, correo, telefono, direccion 
+                 FROM clientes WHERE id_cliente = ?`;
+
+    db.query(sql, [req.session.id_cliente], (err, rows) => {
+        if (err) {
+            console.error("❌ Error al obtener cliente:", err);
+            return res.status(500).json({ error: "Error al obtener cliente" });
+        }
+        res.json(rows[0]);
+    });
+});
+
+// ------------------- EDITAR DATOS DEL CLIENTE -------------------
+app.post("/api/cliente/editar", (req, res) => {
+    if (!req.session.id_cliente) {
+        return res.status(401).send(`
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+    <script>
+        Swal.fire({
+            icon: "warning",
+            title: "Veterinaria UC",
+            text: "⚠️ Debes iniciar sesión para editar tus datos",
+            confirmButtonText: "Iniciar sesión"
+        }).then(() => window.location.href = "/login.html");
+    </script>
+</body>
+</html>
+        `);
+    }
+
+    const { cedula, nombre_completo, usuario, correo, telefono, direccion } = req.body;
+
+    const sql = `
+        UPDATE clientes 
+        SET cedula = ?, nombre_completo = ?, usuario = ?, correo = ?, telefono = ?, direccion = ?
+        WHERE id_cliente = ?
+    `;
+
+    db.query(sql, [cedula, nombre_completo, usuario, correo, telefono, direccion, req.session.id_cliente], (err) => {
+        if (err) {
+            console.error("❌ Error al editar cliente:", err);
+            return res.send(`
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+    <script>
+        Swal.fire({
+            icon: "error",
+            title: "Veterinaria UC",
+            text: "❌ Error al editar los datos",
+            confirmButtonText: "Intentar de nuevo"
+        }).then(() => window.location.href = "/editar_cliente.html");
+    </script>
+</body>
+</html>
+            `);
+        }
+
+        // ✅ Ahora con SweetAlert2 emergente igual al login
+        res.send(`
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+    <script>
+        Swal.fire({
+            icon: "success",
+            title: "Veterinaria UC",
+            text: "✅ Datos actualizados con éxito",
+            confirmButtonText: "Aceptar"
+        }).then(() => window.location.href = "/menus/usuario.html");
+    </script>
+</body>
+</html>
+        `);
+    });
+});
+
+// ------------------- OBTENER UNA MASCOTA -------------------
+app.get("/api/mascota/:id", (req, res) => {
+    if (!req.session.id_cliente) {
+        return res.status(401).json({ error: "No has iniciado sesión" });
+    }
+
+    const sql = `
+        SELECT id_mascota, nombre, especie, raza, color, \`tamaño\` AS tamano, anio_nacimiento
+        FROM mascotas 
+        WHERE id_mascota = ? AND id_cliente = ?
+    `;
+
+    db.query(sql, [req.params.id, req.session.id_cliente], (err, rows) => {
+        if (err) return res.status(500).json({ error: "Error al obtener mascota" });
+        if (rows.length === 0) return res.status(404).json({ error: "Mascota no encontrada" });
+        res.json(rows[0]);
+    });
+});
+
+// ------------------- EDITAR UNA MASCOTA -------------------
+app.post("/api/mascota/editar/:id", (req, res) => {
+    if (!req.session.id_cliente) {
+        return res.status(401).send(`
+            <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+            <script>
+                Swal.fire({
+                    icon: "warning",
+                    title: "Veterinaria UC",
+                    text: "⚠️ Debes iniciar sesión para editar tu mascota",
+                    confirmButtonText: "Iniciar sesión"
+                }).then(() => window.location.href = "/login.html");
+            </script>
+        `);
+    }
+
+    const { nombre, especie, raza, color, tamano, anio_nacimiento } = req.body;
+
+    const sql = `
+        UPDATE mascotas 
+        SET nombre = ?, especie = ?, raza = ?, color = ?, \`tamaño\` = ?, anio_nacimiento = ?
+        WHERE id_mascota = ? AND id_cliente = ?
+    `;
+
+    db.query(sql, [nombre, especie, raza, color, tamano, anio_nacimiento, req.params.id, req.session.id_cliente], (err) => {
+        if (err) {
+            console.error("❌ Error al editar mascota:", err);
             return res.send(`
                 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
                 <script>
                     Swal.fire({
                         icon: "error",
                         title: "Veterinaria UC",
-                        text: "Error al registrar la cita",
+                        text: "❌ Error al editar la mascota",
                         confirmButtonText: "Intentar de nuevo"
-                    }).then(() => {
-                        window.location.href = "/agendar_cita.html";
-                    });
+                    }).then(() => window.location.href = "/editardatos/editarmascota.html?id=${req.params.id}");
                 </script>
             `);
         }
 
-        // Mensaje de éxito con opción a nueva cita
         res.send(`
             <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
             <script>
                 Swal.fire({
                     icon: "success",
                     title: "Veterinaria UC",
-                    text: "Cita registrada con éxito. ¿Desea agendar otra cita?",
-                    showCancelButton: true,
-                    confirmButtonText: "Sí",
-                    cancelButtonText: "No"
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        window.location.href = "/agendar_cita.html";
-                    } else {
-                        window.location.href = "/menus/usuario.html";
-                    }
-                });
+                    text: "✅ Mascota editada con éxito",
+                    confirmButtonText: "Aceptar"
+                }).then(() => window.location.href = "/ver/vermascota.html");
             </script>
         `);
+    });
+});
+
+// ------------------- LISTAR TODAS LAS MASCOTAS DEL CLIENTE -------------------
+app.get("/api/mis-mascotas", (req, res) => {
+    if (!req.session.id_cliente) {
+        return res.status(401).json({ error: "No has iniciado sesión" });
+    }
+
+    const sql = `
+        SELECT id_mascota, nombre, especie, raza, color, \`tamaño\` AS tamano, anio_nacimiento
+        FROM mascotas
+        WHERE id_cliente = ?
+        ORDER BY nombre ASC
+    `;
+
+    db.query(sql, [req.session.id_cliente], (err, rows) => {
+        if (err) {
+            console.error("❌ Error al obtener mascotas:", err);
+            return res.status(500).json({ error: "Error al obtener mascotas" });
+        }
+        res.json(rows);
     });
 });
 

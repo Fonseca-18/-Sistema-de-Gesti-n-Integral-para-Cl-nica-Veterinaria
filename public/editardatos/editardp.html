@@ -1,11 +1,56 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Editar datos personales</title>
+    <title>Editar Datos</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
-    <h1>Acá puedes editar tus datos personales</h1>
+    <h2>Editar Datos</h2>
+    <form action="/api/cliente/editar" method="POST">
+        <label for="cedula">Cédula:</label>
+        <input type="text" id="cedula" name="cedula" required><br><br>
+
+        <label for="nombre_completo">Nombre completo:</label>
+        <input type="text" id="nombre_completo" name="nombre_completo" required><br><br>
+
+        <label for="usuario">Usuario:</label>
+        <input type="text" id="usuario" name="usuario" required><br><br>
+
+        <label for="correo">Correo:</label>
+        <input type="email" id="correo" name="correo" required><br><br>
+
+        <label for="telefono">Teléfono:</label>
+        <input type="text" id="telefono" name="telefono" required><br><br>
+
+        <label for="direccion">Dirección:</label>
+        <input type="text" id="direccion" name="direccion" required><br><br>
+
+        <button type="submit">Guardar Cambios</button>
+    </form>
+
+    <script>
+        // Cargar datos del cliente al abrir la página
+        fetch("/api/cliente")
+            .then(res => {
+                if (!res.ok) throw new Error("No se pudo obtener datos del cliente");
+                return res.json();
+            })
+            .then(cliente => {
+                document.getElementById("cedula").value = cliente.cedula;
+                document.getElementById("nombre_completo").value = cliente.nombre_completo;
+                document.getElementById("usuario").value = cliente.usuario;
+                document.getElementById("correo").value = cliente.correo;
+                document.getElementById("telefono").value = cliente.telefono;
+                document.getElementById("direccion").value = cliente.direccion;
+            })
+            .catch(err => {
+                Swal.fire({
+                    icon: "error",
+                    title: "Veterinaria UC",
+                    text: "❌ Error al cargar datos del cliente",
+                }).then(() => window.location.href = "/menus/usuario.html");
+            });
+    </script>
 </body>
 </html>

@@ -9,7 +9,7 @@ body {
     justify-content: center; 
     align-items: center;
     margin: 0;
-    background: linear-gradient(#000c, transparent, #000c), url(/public/Imagenes/fondomenuusu.png);
+    background: linear-gradient(#000c, transparent, #000c), url(/Imagenes/fondomenuusu.png);
     color: rgb(237, 230, 228);
     background-repeat: no-repeat;
     background-size: cover;

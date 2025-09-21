@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Mis Citas</title>
+</head>
+<body>
+  <h2>Mis Citas</h2>
+  <table border="1" id="tablaCitas">
+    <thead>
+      <tr>
+        <th>Mascota</th>
+        <th>Servicio</th>
+        <th>Veterinario</th>
+        <th>Fecha</th>
+        <th>Hora</th>
+        <th>Recordatorio</th>
+        <th>Intervalo</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <br>
+  <button onclick="window.location.href='/menus/usuario.html'">Regresar</button>
+
+  <script>
+    async function cargarCitas() {
+      try {
+        const res = await fetch("/api/citas");
+        if (!res.ok) throw new Error("Error al obtener citas");
+        const citas = await res.json();
+
+        const tbody = document.querySelector("#tablaCitas tbody");
+        tbody.innerHTML = "";
+
+        if (citas.length === 0) {
+          tbody.innerHTML = "<tr><td colspan='7'>No tienes citas registradas</td></tr>";
+          return;
+        }
+
+        citas.forEach(cita => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>${cita.mascota}</td>
+            <td>${cita.servicio}</td>
+            <td>${cita.veterinario}</td>
+            <td>${cita.fecha}</td>
+            <td>${cita.hora}</td>
+            <td>${cita.recordatorio === "si" ? "Sí" : "No"}</td>
+            <td>${cita.intervalo || "-"}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+      } catch (err) {
+        console.error(err);
+        alert("Error al cargar citas");
+      }
+    }
+
+    cargarCitas();
+  </script>
+</body>
+</html>

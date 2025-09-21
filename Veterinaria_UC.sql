@@ -140,3 +140,59 @@ CREATE TABLE citas (
 );
 
 select * from citas;
+
+INSERT INTO servicios (nombre_servicio, descripcion, tarifa) VALUES
+('Consulta general', 'Revisión médica básica de la mascota.', 50000),
+('Vacunación', 'Aplicación de vacunas preventivas.', 40000),
+('Desparasitación', 'Tratamiento contra parásitos internos o externos.', 30000),
+('Baño medicado', 'Baño especial para problemas de piel o pulgas.', 45000),
+('Cirugía menor', 'Procedimientos quirúrgicos sencillos.', 150000),
+('Control dental', 'Limpieza y revisión dental para mascotas.', 80000),
+('Ecografía', 'Estudio de diagnóstico por imágenes.', 120000),
+('Radiografía', 'Examen radiológico veterinario.', 110000),
+('Hospitalización por día', 'Cuidado y observación en clínica.', 90000);
+
+SET SQL_SAFE_UPDATES = 0;
+
+DELETE FROM servicios;
+
+ALTER TABLE servicios AUTO_INCREMENT = 1;
+
+SET SQL_SAFE_UPDATES = 1; -- (opcional: volver a activarlo después)
+
+INSERT INTO servicios (nombre_servicio, descripcion, tarifa) VALUES
+('Consulta general', 'Revisión médica básica de la mascota.', 50000),
+('Vacunación', 'Aplicación de vacunas preventivas según especie.', 60000),
+('Desparasitación', 'Tratamiento contra parásitos internos o externos.', 40000),
+('Cirugía menor', 'Procedimientos quirúrgicos simples.', 150000),
+('Cirugía mayor', 'Procedimientos quirúrgicos complejos.', 400000),
+('Baño y peluquería', 'Higiene, corte y cuidado estético de la mascota.', 60000),
+('Odontología veterinaria', 'Limpieza y tratamiento dental especializado.', 120000),
+('Hospitalización (por día)', 'Cuidado y observación en clínica por día.', 100000),
+('Exámenes de laboratorio', 'Pruebas clínicas de diagnóstico.', 80000),
+('Radiografía', 'Examen radiológico veterinario.', 90000),
+('Ecografía', 'Estudio de diagnóstico por ultrasonido.', 100000),
+('Control de peso y nutrición', 'Evaluación nutricional y plan de alimentación.', 45000),
+('Atención de emergencia', 'Atención inmediata en casos urgentes.', 180000);
+
+SELECT * FROM servicios;
+
+SELECT id_empleado, nombre_completo 
+FROM empleados 
+WHERE id_rol = 2;
+
+ALTER TABLE empleados
+ADD especialidad VARCHAR(100) NULL AFTER telefono;
+
+INSERT INTO empleados (nombre_completo, usuario, clave, correo, telefono, id_rol, especialidad)
+VALUES ('Carlos Gómez', 'vet1', '1234', 'carlos@example.com', '3009876543', 2, 'Cirugía menor');
+
+select * from empleados;
+
+ALTER TABLE citas
+ADD id_veterinario INT NOT NULL AFTER id_servicio,
+ADD FOREIGN KEY (id_veterinario) REFERENCES empleados(id_empleado);
+
+SELECT * FROM mascotas;
+
+ALTER TABLE mascotas CHANGE tamaño tamano ENUM('Pequeño', 'Mediano', 'Grande') NOT NULL;

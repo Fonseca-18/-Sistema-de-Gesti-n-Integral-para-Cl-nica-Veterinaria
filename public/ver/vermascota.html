@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Mis Mascotas</title>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+  <h1>Mis Mascotas</h1>
+  <table border="1">
+    <thead>
+      <tr>
+        <th>Nombre</th>
+        <th>Especie</th>
+        <th>Raza</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody id="mascotasTableBody"></tbody>
+  </table>
+  <br>
+  <button onclick="window.location.href='index.html'">Regresar</button>
+
+  <script>
+    async function cargarMascotas() {
+      try {
+        const response = await fetch('/api/mascotas');
+        if (!response.ok) throw new Error("Error en la respuesta");
+        const mascotas = await response.json();
+
+        const tbody = document.getElementById("mascotasTableBody");
+        tbody.innerHTML = "";
+
+        mascotas.forEach(mascota => {
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td>${mascota.nombre}</td>
+            <td>${mascota.especie}</td>
+            <td>${mascota.raza}</td>
+            <td>
+              <button onclick="window.location.href='/editardatos/editarmascota.html?id=${mascota.id_mascota}'">Editar</button>
+            </td>
+          `;
+          tbody.appendChild(row);
+        });
+
+      } catch (err) {
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "No se pudieron cargar las mascotas"
+        });
+      }
+    }
+
+    function editarMascota(id) {
+      window.location.href = `/editardatos/editarmascota.html?id=${id}`;
+    }
+
+    window.onload = cargarMascotas;
+  </script>
+</body>
+</html>

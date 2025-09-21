@@ -1,87 +1,221 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Agendar Cita - Veterinaria UC</title>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Agendar Cita - Seleccionar Mascota</title>
 </head>
 <body>
-    <h1>Bienvenido al módulo de agendamiento de citas</h1>
+<h1>Agendar Cita</h1>
 
-    <form action="/agendarCita" method="POST">
-        <!-- Selección de servicio -->
-        <label for="servicio">Selecciona un servicio:</label>
-        <select name="id_servicio" id="servicio" required onchange="actualizarPrecio()">
-            <option value="">Selecciona un servicio</option>
-            <option value="1">Consulta general</option>
-            <option value="2">Vacunación</option>
-            <option value="3">Desparasitación</option>
-            <option value="4">Baño y peluquería</option>
-            <option value="5">Cirugía menor</option>
-            <option value="6">Exámenes de laboratorio</option>
-            <option value="7">Radiografía</option>
-            <option value="8">Control de peso y nutrición</option>
-            <option value="9">Odontología veterinaria</option>
-            <option value="10">Hospitalización</option>
-        </select>
+<form id="formAgendar" action="/agendarCita" method="POST" novalidate>
+  <!-- Mascota -->
+  <label for="mascota">Selecciona tu mascota</label><br>
+  <select id="mascota" name="id_mascota" required>
+    <option value="">Cargando mascotas...</option>
+  </select>
+  <br><br>
 
-        <!-- Mostrar precio dinámico -->
-        <label>Precio del servicio: $<span id="precioServicio">0</span></label>
+  <!-- Servicio -->
+  <label for="servicio">Servicio</label><br>
+  <select id="servicio" name="id_servicio" required>
+    <option value="">Cargando servicios...</option>
+  </select>
+  <br><br>
 
-        <!-- Fecha y hora -->
-        <label for="fecha_hora">Fecha y hora de la cita:</label>
-        <input type="datetime-local" name="fecha_hora" id="fecha_hora" required>
+  <!-- Veterinario -->
+  <label for="veterinario">Veterinario</label><br>
+  <select id="veterinario" name="id_empleado" required>
+    <option value="">Cargando veterinarios...</option>
+  </select>
+  <br><br>
 
-        <!-- Recordatorio -->
-        <label>¿Desea recordatorio del servicio?</label>
-        <input type="radio" name="recordatorio" value="si" onclick="mostrarIntervalo(true)"> Sí
-        <input type="radio" name="recordatorio" value="no" onclick="mostrarIntervalo(false)" checked> No
+  <!-- Fecha -->
+  <label for="fecha">Fecha</label><br>
+  <input id="fecha" name="fecha" type="date" required />
+  <br><br>
 
-        <!-- Intervalo del servicio -->
-        <div id="intervaloServicio" style="display: none;">
-            <label for="intervalo">Cada cuánto tiempo se debe realizar el servicio:</label>
-            <select name="intervalo" id="intervalo">
-                <option value=""> Selecciona el intervalo </option>
-                <option value="1 semana">1 semana</option>
-                <option value="2 semanas">2 semanas</option>
-                <option value="1 mes">1 mes</option>
-                <option value="3 meses">3 meses</option>
-                <option value="6 meses">6 meses</option>
-                <option value="1 año">1 año</option>
-            </select>
-        </div>
+  <!-- Franja horaria -->
+  <label for="hora">Franja horaria</label><br>
+  <select id="hora" name="hora" required>
+    <option value="">Seleccione fecha primero</option>
+  </select>
+  <br><br>
 
-        <button type="submit">Guardar Cita</button>
-    </form>
+  <!-- Recordatorio -->
+  <fieldset style="border:1px solid #ccc; padding:10px;">
+    <legend>¿Desea recordatorio?</legend>
+    <label><input type="radio" name="recordatorio" value="si"> Sí</label>
+    <label><input type="radio" name="recordatorio" value="no" checked> No</label>
+    <div id="intervaloContainer" style="display:none; margin-top:8px;">
+      <label for="intervalo">Intervalo:</label>
+      <select id="intervalo" name="intervalo">
+        <option value="">Seleccione intervalo</option>
+        <option value="1_semana">1 semana</option>
+        <option value="1_mes">1 mes</option>
+        <option value="3_meses">3 meses</option>
+        <option value="6_meses">6 meses</option>
+        <option value="1_anio">1 año</option>
+      </select>
+    </div>
+  </fieldset>
+  <br>
 
-    <a href="javascript:history.back()">Regresar</a>
+  <!-- Hidden enviado al servidor -->
+  <input type="hidden" id="fecha_hora" name="fecha_hora" />
 
-    <script>
-        // Mostrar/ocultar intervalo según recordatorio
-        function mostrarIntervalo(mostrar) {
-            document.getElementById('intervaloServicio').style.display = mostrar ? 'block' : 'none';
-        }
+  <button type="submit">Agendar cita</button>
+</form>
 
-        // Actualizar el precio según el servicio seleccionado
-        function actualizarPrecio() {
-            const servicioSelect = document.getElementById('servicio');
-            const precioSpan = document.getElementById('precioServicio');
-            let precio = 0;
-            switch(servicioSelect.value) {
-                case "1": precio = 50000; break;
-                case "2": precio = 30000; break;
-                case "3": precio = 40000; break;
-                case "4": precio = 25000; break;
-                case "5": precio = 100000; break;
-                case "6": precio = 70000; break;
-                case "7": precio = 60000; break;
-                case "8": precio = 35000; break;
-                case "9": precio = 80000; break;
-                case "10": precio = 120000; break;
-            }
-            precioSpan.textContent = precio;
-        }
-    </script>
+<hr>
+<div id="mensaje"></div>
+
+<script>
+function q(id){ return document.getElementById(id); }
+function formatDateReadable(dateStr) {
+  const d = new Date(dateStr + 'T00:00:00');
+  const opts = { weekday: 'long', day: 'numeric', month: 'long' };
+  return d.toLocaleDateString('es-ES', opts);
+}
+function pad2(n){ return String(n).padStart(2,'0'); }
+
+async function fetchJSON(url){
+  const res = await fetch(url, { credentials: 'same-origin' });
+  if (!res.ok) throw new Error('HTTP ' + res.status + ' ' + url);
+  return res.json();
+}
+async function cargarMascotas(){
+  try {
+    const data = await fetchJSON('/api/mascotas');
+    const sel = q('mascota');
+    sel.innerHTML = '';
+    if (!data || data.length === 0) {
+      sel.innerHTML = '<option value="">No tienes mascotas registradas</option>';
+      return;
+    }
+    sel.innerHTML = '<option value="">-- Selecciona mascota --</option>';
+    data.forEach(m => {
+      const opt = document.createElement('option');
+      opt.value = m.id_mascota;
+      opt.textContent = `${m.nombre} — ${m.especie}${m.raza ? ' / ' + m.raza : ''}`;
+      sel.appendChild(opt);
+    });
+  } catch (e) {
+    console.error('Error cargando mascotas:', e);
+    q('mascota').innerHTML = '<option value="">Error cargando mascotas</option>';
+  }
+}
+async function cargarServicios(){
+  try {
+    const data = await fetchJSON('/api/servicios');
+    const sel = q('servicio');
+    sel.innerHTML = '<option value="">-- Selecciona servicio --</option>';
+    data.forEach(s => {
+      const opt = document.createElement('option');
+      opt.value = s.id_servicio;
+      opt.textContent = `${s.nombre_servicio} — $${Number(s.tarifa).toLocaleString('es-CO')}`;
+      sel.appendChild(opt);
+    });
+  } catch (e) {
+    console.error('Error cargando servicios:', e);
+    q('servicio').innerHTML = '<option value="">Error cargando servicios</option>';
+  }
+}
+async function cargarVeterinarios(){
+  try {
+    const data = await fetchJSON('/api/veterinarios');
+    const sel = q('veterinario');
+    sel.innerHTML = '<option value="">-- Selecciona veterinario --</option>';
+    data.forEach(v => {
+      const opt = document.createElement('option');
+      opt.value = v.id_empleado;
+      opt.textContent = v.especialidad ? `${v.nombre_completo} — ${v.especialidad}` : v.nombre_completo;
+      sel.appendChild(opt);
+    });
+  } catch (e) {
+    console.error('Error cargando veterinarios:', e);
+    q('veterinario').innerHTML = '<option value="">Error cargando veterinarios</option>';
+  }
+}
+function generarFranjasParaFecha(fechaISO) {
+  const sel = q('hora');
+  sel.innerHTML = '<option value="">-- Selecciona franja --</option>';
+  if (!fechaISO) {
+    sel.innerHTML = '<option value="">Seleccione fecha primero</option>';
+    return;
+  }
+  const inicio = 8;
+  const fin = 18;
+  for (let h = inicio; h < fin; h++) {
+    const hh = pad2(h);
+    const horaTexto = `${hh}:00`;
+    const valor = `${fechaISO} ${horaTexto}:00`;
+    const opcion = document.createElement('option');
+    opcion.value = valor;
+    opcion.textContent = `${formatDateReadable(fechaISO)} - Hora ${horaTexto}`;
+    sel.appendChild(opcion);
+  }
+}
+
+// --- Mostrar/ocultar intervalo ---
+document.querySelectorAll('input[name="recordatorio"]').forEach(r => {
+  r.addEventListener('change', () => {
+    q('intervaloContainer').style.display =
+      document.querySelector('input[name="recordatorio"]:checked').value === 'si'
+        ? 'block' : 'none';
+    if (q('intervaloContainer').style.display === 'none') q('intervalo').value = '';
+  });
+});
+
+document.getElementById('formAgendar').addEventListener('submit', async function(e){
+  e.preventDefault();
+  const mascota = q('mascota').value;
+  const servicio = q('servicio').value;
+  const veterinario = q('veterinario').value;
+  const horaSeleccionada = q('hora').value;
+
+  if (!mascota || !servicio || !veterinario || !horaSeleccionada) {
+    alert('Completa todos los campos antes de continuar.');
+    return;
+  }
+
+  const recordatorio = document.querySelector('input[name="recordatorio"]:checked').value;
+  const intervalo = recordatorio === 'si' ? q('intervalo').value : null;
+
+  const payload = {
+    id_mascota: mascota,
+    id_servicio: servicio,
+    id_empleado: veterinario,
+    fecha_hora: horaSeleccionada,
+    recordatorio,
+    intervalo
+  };
+
+  try {
+    const res = await fetch('/agendarCita', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+      credentials: 'same-origin'
+    });
+    const text = await res.text();
+    document.open(); document.write(text); document.close();
+  } catch (err) {
+    console.error('Error enviando la cita:', err);
+    q('mensaje').textContent = 'Ocurrió un error al agendar la cita. Revisa la consola.';
+  }
+});
+
+q('fecha').addEventListener('change', function(){
+  generarFranjasParaFecha(q('fecha').value);
+});
+
+(function init(){
+  cargarMascotas();
+  cargarServicios();
+  cargarVeterinarios();
+  generarFranjasParaFecha('');
+})();
+</script>
 </body>
 </html>
