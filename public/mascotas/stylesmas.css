@@ -1,0 +1,122 @@
+/* Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', Tahoma, sans-serif;
+}
+
+/* Fondo con degradado en verdes de la paleta */
+body.page-bg {
+  background: #f0fff6;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem;
+  color: #2c3e50;
+}
+
+/* Encabezado */
+.header-bar {
+  width: 100%;
+  max-width: 600px;
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.title {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #1b7f5c;            /* verde oscuro elegante */
+  text-shadow: 1px 1px #b5f2c8; /* sombra suave clara como en el segundo CSS */
+}
+
+/* Contenedor principal */
+.main-container {
+  width: 100%;
+  max-width: 600px;
+  display: flex;
+  justify-content: center;
+}
+
+/* Tarjeta del formulario */
+.form-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 2rem;
+  width: 100%;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+  border: 3px solid #6dd58c;
+}
+
+/* Inputs y select */
+.form-group {
+  margin-bottom: 1.2rem;
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 0.6rem;
+  border: 2px solid #6dd58c;
+  border-radius: 8px;
+  background: #eafff2; /* verde claro suave */
+  outline: none;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  border-color: #ffa64d; /* naranja brillante */
+  box-shadow: 0 0 6px #ffa64d;
+}
+
+/* Botones */
+.form-actions {
+  text-align: center;
+  margin-top: 1.5rem;
+}
+
+.btn-primary,
+.btn-secondary {
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 0.6rem 1.4rem;
+  margin: 0.4rem;
+  border: none;
+  border-radius: 10px;
+  transition: transform 0.2s, background 0.3s;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+/* Botón principal naranja */
+.btn-primary {
+  background: #ff914d;
+  color: #fff;
+}
+.btn-primary:hover {
+  background: #ff7a26;
+  transform: scale(1.05);
+}
+
+/* Botón secundario verde medio */
+.btn-secondary {
+  background: #4ecb7b;
+  color: #fff;
+}
+.btn-secondary:hover {
+  background: #3cbf6b;
+  transform: scale(1.05);
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .form-card {
+    padding: 1.2rem;
+  }
+  .title {
+    font-size: 1.6rem;
+  }
+}

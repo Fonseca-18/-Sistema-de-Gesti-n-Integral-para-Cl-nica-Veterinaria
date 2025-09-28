@@ -2,27 +2,42 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="stylesconsul.css">
+  <link rel="icon" href="/Imagenes/iconoo.png" type="image/png">
   <title>Mis Citas</title>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
-  <h2>Mis Citas</h2>
-  <table border="1" id="tablaCitas">
-    <thead>
-      <tr>
-        <th>Mascota</th>
-        <th>Servicio</th>
-        <th>Veterinario</th>
-        <th>Fecha</th>
-        <th>Hora</th>
-        <th>Recordatorio</th>
-        <th>Intervalo</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
+  <div class="container">
+    <header class="header">
+      <h1 class="title">Mis Citas</h1>
+    </header>
 
-  <br>
-  <button onclick="window.location.href='/menus/usuario.html'">Regresar</button>
+    <main class="main-content">
+      <div class="table-wrapper">
+        <table id="tablaCitas" class="styled-table">
+          <thead>
+            <tr>
+              <th>Mascota</th>
+              <th>Servicio</th>
+              <th>Veterinario</th>
+              <th>Fecha</th>
+              <th>Hora</th>
+              <th>Recordatorio</th>
+              <th>Intervalo</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <div class="actions">
+        <button onclick="window.location.href='/menus/usuario.html'" class="btn btn-secondary">Regresar</button>
+      </div>
+    </main>
+  </div>
 
   <script>
     async function cargarCitas() {
@@ -35,7 +50,7 @@
         tbody.innerHTML = "";
 
         if (citas.length === 0) {
-          tbody.innerHTML = "<tr><td colspan='7'>No tienes citas registradas</td></tr>";
+          tbody.innerHTML = "<tr><td colspan='8'>No tienes citas registradas</td></tr>";
           return;
         }
 
@@ -49,12 +64,59 @@
             <td>${cita.hora}</td>
             <td>${cita.recordatorio === "si" ? "Sí" : "No"}</td>
             <td>${cita.intervalo || "-"}</td>
+            <td>
+              <button onclick="cancelarCita(${cita.id_cita})">Cancelar</button>
+            </td>
           `;
           tbody.appendChild(tr);
         });
       } catch (err) {
         console.error(err);
-        alert("Error al cargar citas");
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "Error al cargar citas"
+        });
+      }
+    }
+
+    async function cancelarCita(idCita) {
+      const result = await Swal.fire({
+        title: '¿Seguro que deseas cancelar esta cita?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Sí, cancelar',
+        cancelButtonText: 'No'
+      });
+
+      if (result.isConfirmed) {
+        try {
+          const res = await fetch(`/api/citas/${idCita}`, { method: "DELETE" });
+          const data = await res.json();
+          if (res.ok) {
+            Swal.fire({
+              icon: 'success',
+              title: 'Cita cancelada',
+              text: data.message
+            });
+            cargarCitas();
+          } else {
+            Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: data.error || "No se pudo cancelar la cita"
+            });
+          }
+        } catch (err) {
+          console.error(err);
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Error de conexión'
+          });
+        }
       }
     }
 

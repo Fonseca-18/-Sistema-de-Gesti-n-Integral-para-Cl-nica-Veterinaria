@@ -1,0 +1,113 @@
+/* Reset básico */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, sans-serif;
+  background: #f0fff6; /* verde muy claro de fondo */
+  color: #2c3e50;
+  min-height: 100vh;
+}
+
+/* Contenedor principal */
+.container {
+  max-width: 700px;
+  margin: 40px auto;
+  padding: 25px;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+  border: 3px solid #6dd58c; /* borde verde vibrante */
+}
+
+/* Encabezado */
+.header {
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+.title {
+  font-size: 2rem;
+  color: #1b7f5c; /* verde oscuro elegante */
+  text-shadow: 1px 1px #b5f2c8;
+}
+
+/* Formulario */
+.form .form-group {
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.form label {
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: #1b7f5c;
+}
+
+.form input,
+.form select {
+  padding: 10px;
+  border: 2px solid #6dd58c;
+  border-radius: 8px;
+  font-size: 1rem;
+  background-color: #eafff2; /* verde claro suave */
+  transition: border-color .2s, box-shadow .2s;
+}
+
+.form input:focus,
+.form select:focus {
+  border-color: #ffa64d; /* naranja brillante */
+  box-shadow: 0 0 6px #ffa64d;
+  outline: none;
+}
+
+/* Botones */
+.form-actions {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 25px;
+}
+
+.btn {
+  padding: 12px 20px;
+  border-radius: 10px;
+  font-size: 1rem;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform .15s, background-color .2s;
+  font-weight: 600;
+  border: none;
+}
+
+.btn-primary {
+  background-color: #ff914d; /* naranja vivo */
+  color: #fff;
+}
+
+.btn-primary:hover {
+  background-color: #ff7a26;
+  transform: translateY(-2px);
+}
+
+.btn-secondary {
+  background-color: #4ecb7b; /* verde medio */
+  color: #fff;
+}
+
+.btn-secondary:hover {
+  background-color: #3cbf6b;
+  transform: translateY(-2px);
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .form-actions {
+    flex-direction: column;
+    gap: 12px;
+  }
+}

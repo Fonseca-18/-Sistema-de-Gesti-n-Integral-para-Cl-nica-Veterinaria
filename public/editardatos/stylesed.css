@@ -1,0 +1,126 @@
+/* --------- Estilo general --------- */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body.page-bg {
+  background: #f0fff6;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 2rem;
+  color: #2c3e50;
+}
+
+/* --------- Encabezado --------- */
+.header-bar {
+  width: 100%;
+  max-width: 700px;
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.title {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #1b7f5c;            /* verde oscuro elegante */
+  text-shadow: 1px 1px #b5f2c8; /* sombra suave clara como en el segundo CSS */
+}
+
+/* --------- Contenedor principal --------- */
+.main-container {
+  width: 100%;
+  max-width: 700px;
+  display: flex;
+  justify-content: center;
+}
+
+/* --------- Tarjeta del formulario --------- */
+.form-card {
+  background: #ffffffcc;
+  border-radius: 16px;
+  padding: 2rem;
+  width: 100%;
+  box-shadow: 0 8px 18px rgba(0,0,0,0.15);
+  border: 3px solid #6dd58c;
+}
+
+/* --------- Formularios --------- */
+.veterinaria-form .form-group {
+  margin-bottom: 1.2rem;
+}
+
+.veterinaria-form label {
+  display: block;
+  margin-bottom: 0.4rem;
+  font-weight: 600;
+  color: #1b7f5c; /* verde oscuro elegante */
+}
+
+.veterinaria-form input,
+.veterinaria-form select {
+  width: 100%;
+  padding: 0.6rem;
+  border: 2px solid #6dd58c;
+  border-radius: 8px;
+  background: #eafff2; /* verde muy claro */
+  outline: none;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.veterinaria-form input:focus,
+.veterinaria-form select:focus {
+  border-color: #ffa64d; /* naranja brillante */
+  box-shadow: 0 0 5px #ffa64d;
+}
+
+/* --------- Botones --------- */
+.form-actions {
+  margin-top: 1.5rem;
+  text-align: center;
+}
+
+.btn-primary,
+.btn-secondary {
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 0.6rem 1.5rem;
+  margin: 0.3rem;
+  border: none;
+  border-radius: 10px;
+  transition: transform 0.2s, background 0.3s;
+  font-weight: 600;
+}
+
+.btn-primary {
+  background: #ff914d; /* naranja vivo */
+  color: #fff;
+}
+.btn-primary:hover {
+  background: #ff7a26;
+  transform: scale(1.05);
+}
+
+.btn-secondary {
+  background: #4ecb7b; /* verde medio */
+  color: #fff;
+}
+.btn-secondary:hover {
+  background: #3cbf6b;
+  transform: scale(1.05);
+}
+
+/* --------- Responsive --------- */
+@media (max-width: 600px) {
+  .form-card {
+    padding: 1.2rem;
+  }
+  .title {
+    font-size: 1.6rem;
+  }
+}

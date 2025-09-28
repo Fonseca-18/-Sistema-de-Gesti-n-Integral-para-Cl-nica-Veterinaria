@@ -1,0 +1,115 @@
+/* Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', Tahoma, sans-serif;
+}
+
+/* Fondo degradado en verdes */
+body.page-bg {
+  background: #f0fff6;
+  min-height: 100vh;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: #2c3e50;
+}
+
+/* Encabezado */
+.header-bar {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.title {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #1b7f5c;            /* verde oscuro elegante */
+  text-shadow: 1px 1px #b5f2c8; /* sombra suave clara como en el segundo CSS */
+}
+
+/* Contenedor principal */
+.main-container {
+  width: 100%;
+  max-width: 800px;
+  background: #f0fff6; /* verde muy claro */
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  border: 3px solid #6dd58c;
+}
+
+/* Tabla de mascotas */
+.pets-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1.5rem;
+}
+
+.pets-table thead {
+  background-color: #1b7f5c; /* verde oscuro principal */
+  color: #fff;
+}
+
+.pets-table th,
+.pets-table td {
+  text-align: left;
+  padding: 0.8rem;
+  border-bottom: 1px solid #ccc;
+}
+
+.pets-table tr:nth-child(even) {
+  background-color: #eafff2; /* verde claro suave */
+}
+
+.pets-table tr:hover {
+  background-color: #d8f5e0; /* tono intermedio para hover */
+  transition: background 0.3s;
+}
+
+/* Botones */
+.actions {
+  text-align: center;
+}
+
+button {
+  cursor: pointer;
+  padding: 0.5rem 1.2rem;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: background 0.3s, transform 0.2s;
+}
+
+/* Botón Regresar (naranja) */
+.btn-secondary {
+  background: #ff914d;
+  color: #fff;
+}
+.btn-secondary:hover {
+  background: #ff7a26;
+  transform: scale(1.05);
+}
+
+/* Botón Editar (verde medio) */
+.btn-edit {
+  background: #4ecb7b;
+  color: #fff;
+}
+.btn-edit:hover {
+  background: #3cbf6b;
+  transform: scale(1.05);
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .title {
+    font-size: 1.8rem;
+  }
+  .pets-table th,
+  .pets-table td {
+    padding: 0.6rem;
+  }
+}

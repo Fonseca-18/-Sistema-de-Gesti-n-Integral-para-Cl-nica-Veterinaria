@@ -1,46 +1,65 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="stylesmenu.css">
-    <title>Menu Usuario</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="stylesmenu.css" />
+  <link rel="icon" href="/Imagenes/iconoo.png" type="image/png">
+  <title>Menú Cliente</title>
 </head>
 <body>
-    <div class="contenedor-menu-usu">
-        <div class="titulo-menu-usu">
-            <h1>Zona Cliente</h1>
-        </div>
-
-        <div class="imagen-menu-usu">
-            <div class="caja-img-men-usu">
-                <a href="/mascotas/registromascota.html">
-                    <img class="img-regmas" src="/Imagenes/agregarmascota.png" alt="Agregar Mascota">
-                </a>
-            </div>
-            <div class="caja-img-men-usu">
-                <a href="/agendar/agendarcitas.html">
-                    <img class="img-agecit" src="/Imagenes/agendarcita.png" alt="Agendar Cita">
-                </a>
-            </div>
-            <div class="caja-img-men-usu">
-                <a href="/consultas/cunsultacita.html">
-                    <img class="img-concit" src="/Imagenes/consultarcita.png" alt="Consultar Cita">
-                </a>
-            </div>
-            <div class="caja-img-men-usu">
-                <a href="/editardatos/editardp.html">
-                    <img class="img-edidp" src="/Imagenes/editardp.png" alt="Editar Datos Personales">
-                </a>
-            </div>
-            <div class="caja-img-men-usu">
-                <a href="/ver/vermascota.html">
-                    <img class="img-edimas" src="/Imagenes/editarmascota.png" alt="Editar Datos de la Mascota">
-                </a>
-            </div>
-        </div>
-
-        <button>Cerrar sesión</button>
+  <main class="contenedor-menu-usu">
+    
+    <div class="menu-header">
+      <h1 class="titulo-menu-usu">🐾 Zona Cliente</h1>
     </div>
+
+    <nav class="menu-links">
+      <div class="menu-lista">
+        <ul class="menu-ul">
+          <li class="menu-item">
+            <a class="menu-link" href="/mascotas/registromascota.html">
+              🐶 Registrar Mascota
+            </a>
+          </li>
+          <li class="menu-item">
+            <a class="menu-link" href="/agendar/agendarcitas.html">
+              📅 Agendar Cita
+            </a>
+          </li>
+          <li class="menu-item">
+            <a class="menu-link" href="/consultas/cunsultacita.html">
+              🔍 Consultar Cita
+            </a>
+          </li>
+          <li class="menu-item">
+            <a class="menu-link" href="/editardatos/editardp.html">
+              ✏️ Editar Datos Personales
+            </a>
+          </li>
+          <li class="menu-item">
+            <a class="menu-link" href="/ver/vermascota.html">
+              🐾 Editar Datos de la Mascota
+            </a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+
+    <div class="menu-footer">
+      <button id="logoutBtn" type="button" class="btn-logout">🚪 Cerrar sesión</button>
+    </div>
+
+  </main>
+
+  <script>
+    document.getElementById("logoutBtn").addEventListener("click", () => {
+      fetch("/logout")
+        .then(() => {
+          window.location.href = "/index.html";
+        })
+        .catch(err => console.error("Error al cerrar sesión:", err));
+    });
+  </script>
 </body>
 </html>

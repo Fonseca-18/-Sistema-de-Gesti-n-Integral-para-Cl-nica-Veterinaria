@@ -3,23 +3,33 @@
 <head>
   <meta charset="UTF-8">
   <title>Mis Mascotas</title>
+  <link rel="stylesheet" href="stylesver.css">
+  <link rel="icon" href="/Imagenes/iconoo.png" type="image/png">
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
-<body>
-  <h1>Mis Mascotas</h1>
-  <table border="1">
-    <thead>
-      <tr>
-        <th>Nombre</th>
-        <th>Especie</th>
-        <th>Raza</th>
-        <th>Acciones</th>
-      </tr>
-    </thead>
-    <tbody id="mascotasTableBody"></tbody>
-  </table>
-  <br>
-  <button onclick="window.location.href='index.html'">Regresar</button>
+<body class="page-bg">
+
+  <header class="header-bar">
+    <h1 class="title">Mis Mascotas</h1>
+  </header>
+
+  <main class="main-container">
+    <table class="pets-table">
+      <thead>
+        <tr>
+          <th>Nombre</th>
+          <th>Especie</th>
+          <th>Raza</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody id="mascotasTableBody"></tbody>
+    </table>
+
+    <div class="actions">
+      <button class="btn-secondary" onclick="window.location.href='/menus/usuario.html'"> Regresar</button>
+    </div>
+  </main>
 
   <script>
     async function cargarMascotas() {
@@ -38,7 +48,7 @@
             <td>${mascota.especie}</td>
             <td>${mascota.raza}</td>
             <td>
-              <button onclick="window.location.href='/editardatos/editarmascota.html?id=${mascota.id_mascota}'">Editar</button>
+              <button class="btn-edit" onclick="window.location.href='/editardatos/editarmascota.html?id=${mascota.id_mascota}'">Editar</button>
             </td>
           `;
           tbody.appendChild(row);
@@ -52,11 +62,6 @@
         });
       }
     }
-
-    function editarMascota(id) {
-      window.location.href = `/editardatos/editarmascota.html?id=${id}`;
-    }
-
     window.onload = cargarMascotas;
   </script>
 </body>

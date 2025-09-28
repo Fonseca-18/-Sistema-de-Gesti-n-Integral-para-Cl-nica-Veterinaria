@@ -3,36 +3,61 @@
 <head>
   <meta charset="UTF-8">
   <title>Editar Mascota</title>
+  <link rel="stylesheet" href="stylesed.css">
+  <link rel="icon" href="/Imagenes/iconoo.png" type="image/png">
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
-<body>
-  <h1>Editar Mascota</h1>
-  <form id="formEditarMascota">
-    <input type="hidden" id="id_mascota" name="id_mascota">
+<body class="page-bg">
+  <header class="header-bar">
+    <h1 class="title"> Editar Mascota</h1>
+  </header>
 
-    <label>Nombre:</label>
-    <input type="text" id="nombre" name="nombre"><br>
+  <main class="main-container">
+    <section class="form-card">
+      <form id="formEditarMascota" class="veterinaria-form">
+        <input type="hidden" id="id_mascota" name="id_mascota">
 
-    <label>Especie:</label>
-    <input type="text" id="especie" name="especie"><br>
+        <div class="form-group">
+          <label for="nombre">Nombre:</label>
+          <input type="text" id="nombre" name="nombre" required>
+        </div>
 
-    <label>Raza:</label>
-    <input type="text" id="raza" name="raza"><br>
+        <div class="form-group">
+          <label for="especie">Especie:</label>
+          <input type="text" id="especie" name="especie" required>
+        </div>
 
-    <label>Color:</label>
-    <input type="text" id="color" name="color"><br>
+        <div class="form-group">
+          <label for="raza">Raza:</label>
+          <input type="text" id="raza" name="raza">
+        </div>
 
-    <label>Tamaño:</label>
-    <input type="text" id="tamano" name="tamano"><br>
+        <div class="form-group">
+          <label for="color">Color:</label>
+          <input type="text" id="color" name="color">
+        </div>
 
-    <label>Año Nacimiento:</label>
-    <input type="number" id="anio_nacimiento" name="anio_nacimiento"><br>
+        <div class="form-group">
+          <label for="tamano">Tamaño:</label>
+          <select id="tamano" name="tamano">
+            <option value="Pequeño">Pequeño</option>
+            <option value="Mediano">Mediano</option>
+            <option value="Grande">Grande</option>
+          </select>
+        </div>
 
-    <button type="submit">Guardar Cambios</button>
-  </form>
+        <div class="form-group">
+          <label for="anio_nacimiento">Año Nacimiento:</label>
+          <input type="number" id="anio_nacimiento" name="anio_nacimiento">
+        </div>
 
-  <br>
-  <button onclick="window.location.href='/ver/vermascota.html'">⬅ Regresar</button>
+        <div class="form-actions">
+          <button type="button" class="btn-secondary" onclick="window.location.href='/ver/vermascota.html'"> Regresar</button>
+          <button type="submit" class="btn-primary"> Guardar Cambios</button>
+        </div>
+      </form>
+    </section>
+  </main>
 
   <script>
     const urlParams = new URLSearchParams(window.location.search);
@@ -40,30 +65,26 @@
 
     async function cargarMascota() {
       try {
-        const response = await fetch(`/api/mascotas/${idMascota}`);
+        const response = await fetch(`/api/mascota/${idMascota}`);
         if (!response.ok) throw new Error("Mascota no encontrada");
-
         const mascota = await response.json();
         document.getElementById("id_mascota").value = mascota.id_mascota;
         document.getElementById("nombre").value = mascota.nombre;
         document.getElementById("especie").value = mascota.especie;
-        document.getElementById("raza").value = mascota.raza;
-        document.getElementById("color").value = mascota.color;
+        document.getElementById("raza").value = mascota.raza || "";
+        document.getElementById("color").value = mascota.color || "";
         document.getElementById("tamano").value = mascota.tamano;
         document.getElementById("anio_nacimiento").value = mascota.anio_nacimiento;
-
       } catch (err) {
         Swal.fire({
           icon: "error",
           title: "Error",
           text: "Mascota no encontrada"
-        }).then(() => {
-          window.location.href = "/ver/vermascota.html";
-        });
+        }).then(() => window.location.href = "/ver/vermascota.html");
       }
     }
 
-    document.getElementById("formEditarMascota").addEventListener("submit", async function (e) {
+    document.getElementById("formEditarMascota").addEventListener("submit", async e => {
       e.preventDefault();
       const data = {
         nombre: document.getElementById("nombre").value,
@@ -75,27 +96,25 @@
       };
 
       try {
-        const response = await fetch(`/api/mascotas/${idMascota}`, {
-          method: "PUT",
+        const response = await fetch(`/api/mascota/editar/${idMascota}`, {
+          method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(data)
         });
-
-        if (!response.ok) throw new Error("Error al actualizar");
-
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || "Error al actualizar");
+        }
         Swal.fire({
           icon: "success",
           title: "Éxito",
           text: "Mascota actualizada con éxito"
-        }).then(() => {
-          window.location.href = "/ver/vermascota.html";
-        });
-
+        }).then(() => window.location.href = "/ver/vermascota.html");
       } catch (err) {
         Swal.fire({
           icon: "error",
           title: "Error",
-          text: "No se pudo actualizar la mascota"
+          text: err.message || "No se pudo actualizar la mascota"
         });
       }
     });

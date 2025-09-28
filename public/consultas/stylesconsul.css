@@ -1,0 +1,165 @@
+/* Reset básico */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, sans-serif;
+  background: #f0fff6; /* verde muy claro de fondo */
+  color: #2c3e50;
+  min-height: 100vh;
+}
+
+/* Contenedor general */
+.container {
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 25px;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+  border: 3px solid #6dd58c; /* verde vibrante */
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+.title {
+  font-size: 2rem;
+  color: #1b7f5c;            /* verde oscuro elegante */
+  text-shadow: 1px 1px #b5f2c8;
+}
+
+/* Botones */
+.btn {
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-size: 1rem;
+  text-decoration: none;
+  cursor: pointer;
+  font-weight: 600;
+  border: none;
+  transition: transform .15s, background-color .2s;
+}
+
+.btn-primary {
+  background-color: #ff914d; /* naranja vivo */
+  color: #fff;
+}
+.btn-primary:hover {
+  background-color: #ff7a26;
+  transform: translateY(-2px);
+}
+
+.btn-secondary {
+  background-color: #4ecb7b; /* verde medio */
+  color: #fff;
+}
+.btn-secondary:hover {
+  background-color: #3cbf6b;
+  transform: translateY(-2px);
+}
+
+.actions {
+  margin-top: 20px;
+  text-align: center;
+}
+
+/* Separador */
+.divider {
+  margin: 25px 0;
+  border: 0;
+  height: 2px;
+  background: #6dd58c;
+}
+
+/* Tablas */
+.table-wrapper {
+  overflow-x: auto;
+  margin-top: 20px;
+}
+
+.styled-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 1rem;
+}
+
+.styled-table th,
+.styled-table td {
+  border: 2px solid #6dd58c;
+  padding: 10px 8px;
+  text-align: left;
+}
+
+.styled-table th {
+  background-color: #1b7f5c;
+  color: #fff;
+}
+
+.styled-table tr:nth-child(even) {
+  background-color: #eafff2; /* verde claro suave */
+}
+
+/* Formularios en consulta cliente */
+.form-group-inline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.form-group-inline input {
+  padding: 8px;
+  border: 2px solid #6dd58c;
+  border-radius: 6px;
+  flex: 1;
+}
+
+.form-edit fieldset {
+  border: 2px solid #6dd58c;
+  border-radius: 10px;
+  padding: 15px;
+  margin-bottom: 20px;
+  background: #f9fff9;
+}
+
+.form-edit legend {
+  font-weight: bold;
+  color: #1b7f5c;
+}
+
+.form-edit input,
+.form-edit select {
+  width: 100%;
+  margin-bottom: 10px;
+  padding: 8px;
+  border: 2px solid #6dd58c;
+  border-radius: 6px;
+  background: #eafff2;
+}
+
+.form-edit .mascota {
+  border: 2px solid #4ecb7b;
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 15px;
+  background: #f0fff6;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .form-group-inline {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .styled-table th,
+  .styled-table td {
+    font-size: 0.9rem;
+  }
+}

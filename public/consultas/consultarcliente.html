@@ -1,17 +1,164 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Consulta de clientes</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="stylesheet" href="stylesconsul.css">
+  <link rel="icon" href="/Imagenes/iconoo.png" type="image/png">
+  <title>Consulta y Edición de Cliente</title>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
-    <h1>Información de el cliente</h1>
+  <div class="container">
+    <header class="header">
+      <h1 class="title">Consulta y Edición de Cliente</h1>
+    </header>
 
-    <label for="">Ingresa la cédula de el cliente: </label>
-    <input type="tel">
-    <button>Buscar</button>
+    <main class="main-content">
+      <div class="form-group-inline">
+        <label for="cedula">Cédula del cliente:</label>
+        <input type="tel" id="cedula" placeholder="Cédula" required>
+        <button id="btn-buscar" class="btn btn-primary">Buscar</button>
+      </div>
 
-    <a href="javascript:history.back()">Regresar</a>
+      <hr class="divider">
+
+      <div id="formulario-edicion" class="form-edit"></div>
+
+      <div class="actions">
+        <a href="javascript:history.back()" class="btn btn-secondary">Regresar</a>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const btnBuscar = document.getElementById('btn-buscar');
+    const cedulaInput = document.getElementById('cedula');
+    const contenedor = document.getElementById('formulario-edicion');
+
+    btnBuscar.addEventListener('click', async () => {
+      const cedula = cedulaInput.value.trim();
+      if (!cedula) {
+        return Swal.fire('Atención', 'Por favor ingresa una cédula.', 'warning');
+      }
+
+      try {
+        const resp = await fetch(`/consulta_cliente/${cedula}`);
+        const data = await resp.json();
+        if (!data.success) {
+          contenedor.innerHTML = '';
+          return Swal.fire('No encontrado', data.message || 'Cliente no encontrado', 'error');
+        }
+        renderFormulario(data.cliente, data.mascotas);
+        Swal.fire('Consulta exitosa', 'Ahora puedes editar los datos.', 'success');
+      } catch (e) {
+        console.error(e);
+        Swal.fire('Error', 'No se pudo consultar la información.', 'error');
+      }
+    });
+
+    function renderFormulario(cliente, mascotas) {
+      let html = `
+        <fieldset>
+          <legend>Datos del Cliente</legend>
+          <input type="hidden" id="id_cliente" value="${cliente.id_cliente}">
+          <label>Nombre completo:</label>
+          <input type="text" id="nombre_completo" value="${cliente.nombre_completo}">
+          <label>Teléfono:</label>
+          <input type="text" id="telefono" value="${cliente.telefono || ''}">
+          <label>Correo:</label>
+          <input type="email" id="correo" value="${cliente.correo || ''}">
+          <label>Dirección:</label>
+          <input type="text" id="direccion" value="${cliente.direccion || ''}">
+          <button onclick="guardarCliente()">Guardar cambios de cliente</button>
+        </fieldset>
+      `;
+
+      html += `<h3>Mascotas</h3>`;
+      if (mascotas.length === 0) {
+        html += `<p><em>Este cliente no tiene mascotas.</em></p>`;
+      } else {
+        mascotas.forEach(m => {
+          html += `
+            <div class="mascota">
+              <input type="hidden" id="m-${m.id_mascota}-id" value="${m.id_mascota}">
+              <label>Nombre:</label>
+              <input type="text" id="m-${m.id_mascota}-nombre" value="${m.nombre}">
+              <label>Especie:</label>
+              <input type="text" id="m-${m.id_mascota}-especie" value="${m.especie}">
+              <label>Raza:</label>
+              <input type="text" id="m-${m.id_mascota}-raza" value="${m.raza || ''}">
+              <label>Color:</label>
+              <input type="text" id="m-${m.id_mascota}-color" value="${m.color || ''}">
+              <label>Tamaño:</label>
+              <select id="m-${m.id_mascota}-tamano">
+                <option ${m.tamano==='Pequeño'?'selected':''}>Pequeño</option>
+                <option ${m.tamano==='Mediano'?'selected':''}>Mediano</option>
+                <option ${m.tamano==='Grande'?'selected':''}>Grande</option>
+              </select>
+              <label>Año de nacimiento:</label>
+              <input type="number" id="m-${m.id_mascota}-anio" value="${m.anio_nacimiento}">
+              <button onclick="guardarMascota(${m.id_mascota})">Guardar cambios de esta mascota</button>
+            </div>
+          `;
+        });
+      }
+      contenedor.innerHTML = html;
+    }
+
+    async function guardarCliente() {
+      const payload = {
+        id_cliente: document.getElementById('id_cliente').value,
+        nombre_completo: document.getElementById('nombre_completo').value,
+        telefono: document.getElementById('telefono').value,
+        correo: document.getElementById('correo').value,
+        direccion: document.getElementById('direccion').value
+      };
+
+      try {
+        const resp = await fetch('/actualizar_cliente', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await resp.json();
+        if (data.success) {
+          Swal.fire('Éxito', 'Datos del cliente actualizados.', 'success');
+        } else {
+          Swal.fire('Error', data.message || 'No se pudo actualizar el cliente.', 'error');
+        }
+      } catch (e) {
+        Swal.fire('Error', 'Fallo en la conexión.', 'error');
+      }
+    }
+
+    async function guardarMascota(id) {
+      const payload = {
+        id_mascota: id,
+        nombre: document.getElementById(`m-${id}-nombre`).value,
+        especie: document.getElementById(`m-${id}-especie`).value,
+        raza: document.getElementById(`m-${id}-raza`).value,
+        color: document.getElementById(`m-${id}-color`).value,
+        tamano: document.getElementById(`m-${id}-tamano`).value,
+        anio_nacimiento: document.getElementById(`m-${id}-anio`).value
+      };
+
+      try {
+        const resp = await fetch('/actualizar_mascota', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await resp.json();
+        if (data.success) {
+          Swal.fire('Éxito', 'Datos de la mascota actualizados.', 'success');
+        } else {
+          Swal.fire('Error', data.message || 'No se pudo actualizar la mascota.', 'error');
+        }
+      } catch (e) {
+        Swal.fire('Error', 'Fallo en la conexión.', 'error');
+      }
+    }
+  </script>
 </body>
 </html>

@@ -1,11 +1,71 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Citas pendientes</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="stylesconsul.css">
+  <link rel="icon" href="/Imagenes/iconoo.png" type="image/png">
+  <title>Citas Pendientes</title>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
-    <h1>Estas son las citas pendientes</h1>
+  <div class="container">
+    <header class="header">
+      <h1 class="title">Citas Pendientes</h1>
+    </header>
+
+    <main class="main-content">
+      <div id="citas-container" class="table-wrapper"></div>
+
+      <div class="actions">
+        <a href="javascript:history.back()" class="btn btn-secondary">Regresar</a>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      try {
+        const resp = await fetch('/citas_pendientes');
+        const data = await resp.json();
+
+        if (!data.success) {
+          Swal.fire('Error', data.message || 'No se pudieron cargar las citas.', 'error');
+          return;
+        }
+
+        if (data.citas.length === 0) {
+          Swal.fire('Sin citas', 'No tienes citas pendientes.', 'info');
+          document.getElementById('citas-container').innerHTML = '<p>No hay citas pendientes.</p>';
+          return;
+        }
+
+        // Construir tabla con los campos correctos
+        let html = '<table>';
+        html += '<tr><th>Cliente</th><th>Mascota</th><th>Servicio</th><th>Fecha y hora</th></tr>';
+        data.citas.forEach(c => {
+          // c.fecha_hora es tipo DATETIME: formateamos
+          const fechaHora = new Date(c.fecha_hora).toLocaleString('es-CO', {
+            dateStyle: 'short',
+            timeStyle: 'short'
+          });
+          html += `<tr>
+            <td>${c.cliente}</td>
+            <td>${c.mascota}</td>
+            <td>${c.servicio}</td>
+            <td>${fechaHora}</td>
+          </tr>`;
+        });
+        html += '</table>';
+
+        document.getElementById('citas-container').innerHTML = html;
+
+        Swal.fire('Citas cargadas', 'Estas son tus citas pendientes.', 'success');
+      } catch (err) {
+        console.error(err);
+        Swal.fire('Error', 'Ocurrió un problema al cargar las citas.', 'error');
+      }
+    });
+  </script>
 </body>
 </html>

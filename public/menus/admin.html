@@ -1,18 +1,49 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="stylesmenu.css">
-    <title>Menu Administrador</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Menú Administrador</title>
+  <link rel="stylesheet" href="stylesmenu.css" />
+  <link rel="icon" href="/Imagenes/iconoo.png" type="image/png">
 </head>
 <body>
-    <h1>Zona Administrador</h1>
+  <main class="contenedor-menu-usu">
+    
+    <div class="menu-header">
+      <h1 class="titulo-menu-usu">🐾 Zona Administrador</h1>
+    </div>
 
-    <a href="/register.html">Registro de nuevos clientes</a>
-    <a href="/consultas/consultarcliente.html">Consultar Datos de el cliente</a>
-    <a href="/empleados/nuevoempleado.html">Agregar nuevo empleado</a>
+    <nav class="menu-links">
+      <div class="menu-lista">
+        <ul class="menu-ul">
+          <li class="menu-item">
+            <a class="menu-link" href="/register.html">📝 Registro de nuevos clientes</a>
+          </li>
+          <li class="menu-item">
+            <a class="menu-link" href="/consultas/consultarcliente.html">🔍 Consultar datos del cliente</a>
+          </li>
+          <li class="menu-item">
+            <a class="menu-link" href="/empleados/nuevoempleado.html">👩‍⚕️ Agregar nuevo empleado</a>
+          </li>
+        </ul>
+      </div>
+    </nav>
 
-    <button>Cerrar sesión</button>
+    <div class="menu-footer">
+      <button id="logoutBtn" type="button" class="btn-logout">🚪 Cerrar sesión</button>
+    </div>
+    
+  </main>
+
+  <script>
+    document.getElementById("logoutBtn").addEventListener("click", () => {
+      fetch("/logout")
+        .then(() => {
+          window.location.href = "/index.html";
+        })
+        .catch(err => console.error("Error al cerrar sesión:", err));
+    });
+  </script>
 </body>
 </html>

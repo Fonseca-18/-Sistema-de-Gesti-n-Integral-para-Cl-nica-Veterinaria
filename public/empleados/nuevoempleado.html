@@ -1,13 +1,108 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nuevo Empleado</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Registrar Nuevo Empleado</title>
+  <link rel="stylesheet" href="stylesemp.css">
+  <link rel="icon" href="/Imagenes/iconoo.png" type="image/png">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
-<body>
-    <h1>Registrar nuevo empleado</h1>
+<body class="page-bg">
 
-    <a href="javascript:history.back()">Regresar</a>
+  <header class="header-bar">
+    <h1 class="title">Registrar Nuevo Empleado</h1>
+  </header>
+
+  <main class="main-container">
+    <form id="form-empleado" class="form-card">
+
+      <div class="form-group">
+        <label for="nombre_completo">Nombre completo:</label>
+        <input type="text" id="nombre_completo" name="nombre_completo" required>
+      </div>
+
+      <div class="form-group">
+        <label for="usuario">Usuario:</label>
+        <input type="text" id="usuario" name="usuario" required>
+      </div>
+
+      <div class="form-group">
+        <label for="clave">Contraseña:</label>
+        <input type="password" id="clave" name="clave" required>
+      </div>
+
+      <div class="form-group">
+        <label for="correo">Correo:</label>
+        <input type="email" id="correo" name="correo">
+      </div>
+
+      <div class="form-group">
+        <label for="telefono">Teléfono:</label>
+        <input type="text" id="telefono" name="telefono">
+      </div>
+
+      <div class="form-group">
+        <label for="id_rol">Rol:</label>
+        <select id="id_rol" name="id_rol" required>
+          <option value=""> Seleccione </option>
+          <option value="1">Admin</option>
+          <option value="2">Veterinario</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="especialidad">Especialidad (solo si es veterinario):</label>
+        <input type="text" id="especialidad" name="especialidad">
+      </div>
+
+      <div class="form-actions">
+        <a href="javascript:history.back()" class="btn-secondary"> Regresar</a>    
+        <button type="submit" class="btn-primary">Registrar Empleado</button>
+      </div>
+
+    </form>
+  </main>
+
+  <script>
+    const form = document.getElementById('form-empleado');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const data = Object.fromEntries(new FormData(form).entries());
+
+      try {
+        const resp = await fetch('/registro_empleado', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+
+        const json = await resp.json();
+
+        if (json.success) {
+          Swal.fire({
+            icon: 'success',
+            title: 'Veterinaria UC',
+            text: '✅ Empleado registrado con éxito',
+            confirmButtonText: 'Ir al menú'
+          }).then(() => window.location.href = '/menus/admin.html');
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: json.message || '❌ Error al registrar empleado'
+          });
+        }
+      } catch {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'No se pudo conectar con el servidor'
+        });
+      }
+    });
+  </script>
 </body>
 </html>

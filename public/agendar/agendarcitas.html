@@ -3,72 +3,81 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="stylesagen.css">
+  <link rel="icon" href="/Imagenes/iconoo.png" type="image/png">
   <title>Agendar Cita - Seleccionar Mascota</title>
 </head>
 <body>
-<h1>Agendar Cita</h1>
+  <div class="container">
+    <header class="header">
+      <h1 class="title">Agendar Cita</h1>
+    </header>
 
-<form id="formAgendar" action="/agendarCita" method="POST" novalidate>
-  <!-- Mascota -->
-  <label for="mascota">Selecciona tu mascota</label><br>
-  <select id="mascota" name="id_mascota" required>
-    <option value="">Cargando mascotas...</option>
-  </select>
-  <br><br>
+    <main class="main-content">
+      <form id="formAgendar" action="/agendarCita" method="POST" novalidate class="form">
 
-  <!-- Servicio -->
-  <label for="servicio">Servicio</label><br>
-  <select id="servicio" name="id_servicio" required>
-    <option value="">Cargando servicios...</option>
-  </select>
-  <br><br>
+        <div class="form-group">
+          <label for="mascota">Selecciona tu mascota</label>
+          <select id="mascota" name="id_mascota" required>
+            <option value="">Cargando mascotas...</option>
+          </select>
+        </div>
 
-  <!-- Veterinario -->
-  <label for="veterinario">Veterinario</label><br>
-  <select id="veterinario" name="id_empleado" required>
-    <option value="">Cargando veterinarios...</option>
-  </select>
-  <br><br>
+        <div class="form-group">
+          <label for="servicio">Servicio</label>
+          <select id="servicio" name="id_servicio" required>
+            <option value="">Cargando servicios...</option>
+          </select>
+        </div>
 
-  <!-- Fecha -->
-  <label for="fecha">Fecha</label><br>
-  <input id="fecha" name="fecha" type="date" required />
-  <br><br>
+        <div class="form-group">
+          <label for="veterinario">Veterinario</label>
+          <select id="veterinario" name="id_empleado" required>
+            <option value="">Cargando veterinarios...</option>
+          </select>
+        </div>
 
-  <!-- Franja horaria -->
-  <label for="hora">Franja horaria</label><br>
-  <select id="hora" name="hora" required>
-    <option value="">Seleccione fecha primero</option>
-  </select>
-  <br><br>
+        <div class="form-group">
+          <label for="fecha">Fecha</label>
+          <input id="fecha" name="fecha" type="date" required />
+        </div>
 
-  <!-- Recordatorio -->
-  <fieldset style="border:1px solid #ccc; padding:10px;">
-    <legend>¿Desea recordatorio?</legend>
-    <label><input type="radio" name="recordatorio" value="si"> Sí</label>
-    <label><input type="radio" name="recordatorio" value="no" checked> No</label>
-    <div id="intervaloContainer" style="display:none; margin-top:8px;">
-      <label for="intervalo">Intervalo:</label>
-      <select id="intervalo" name="intervalo">
-        <option value="">Seleccione intervalo</option>
-        <option value="1_semana">1 semana</option>
-        <option value="1_mes">1 mes</option>
-        <option value="3_meses">3 meses</option>
-        <option value="6_meses">6 meses</option>
-        <option value="1_anio">1 año</option>
-      </select>
-    </div>
-  </fieldset>
-  <br>
+        <div class="form-group">
+          <label for="hora">Franja horaria</label>
+          <select id="hora" name="hora" required>
+            <option value="">Seleccione fecha primero</option>
+          </select>
+        </div>
 
-  <!-- Hidden enviado al servidor -->
-  <input type="hidden" id="fecha_hora" name="fecha_hora" />
+        <fieldset class="form-group fieldset">
+          <legend>¿Desea recordatorio?</legend>
+          <label><input type="radio" name="recordatorio" value="si"> Sí</label>
+          <label><input type="radio" name="recordatorio" value="no" checked> No</label>
+          <div id="intervaloContainer" class="intervalo-container">
+            <label for="intervalo">Intervalo:</label>
+            <select id="intervalo" name="intervalo">
+              <option value="">Seleccione intervalo</option>
+              <option value="1_semana">1 semana</option>
+              <option value="1_mes">1 mes</option>
+              <option value="3_meses">3 meses</option>
+              <option value="6_meses">6 meses</option>
+              <option value="1_anio">1 año</option>
+            </select>
+          </div>
+        </fieldset>
 
-  <button type="submit">Agendar cita</button>
-</form>
+        <input type="hidden" id="fecha_hora" name="fecha_hora" />
 
-<hr>
-<div id="mensaje"></div>
+        <div class="form-actions">
+          <a href="/menus/usuario.html" class="btn btn-secondary">Regresar</a>
+          <button type="submit" class="btn btn-primary">Agendar cita</button>
+        </div>
+      </form>
+
+      <hr class="divider">
+      <div id="mensaje" class="mensaje"></div>
+    </main>
+  </div>
 
 <script>
 function q(id){ return document.getElementById(id); }
@@ -93,7 +102,7 @@ async function cargarMascotas(){
       sel.innerHTML = '<option value="">No tienes mascotas registradas</option>';
       return;
     }
-    sel.innerHTML = '<option value="">-- Selecciona mascota --</option>';
+    sel.innerHTML = '<option value=""> Selecciona mascota </option>';
     data.forEach(m => {
       const opt = document.createElement('option');
       opt.value = m.id_mascota;
@@ -109,7 +118,7 @@ async function cargarServicios(){
   try {
     const data = await fetchJSON('/api/servicios');
     const sel = q('servicio');
-    sel.innerHTML = '<option value="">-- Selecciona servicio --</option>';
+    sel.innerHTML = '<option value=""> Selecciona servicio </option>';
     data.forEach(s => {
       const opt = document.createElement('option');
       opt.value = s.id_servicio;
@@ -125,7 +134,7 @@ async function cargarVeterinarios(){
   try {
     const data = await fetchJSON('/api/veterinarios');
     const sel = q('veterinario');
-    sel.innerHTML = '<option value="">-- Selecciona veterinario --</option>';
+    sel.innerHTML = '<option value=""> Selecciona veterinario </option>';
     data.forEach(v => {
       const opt = document.createElement('option');
       opt.value = v.id_empleado;

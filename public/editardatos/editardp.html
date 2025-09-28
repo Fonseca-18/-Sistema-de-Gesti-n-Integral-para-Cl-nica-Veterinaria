@@ -1,56 +1,79 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <title>Editar Datos</title>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <meta charset="UTF-8">
+  <title>Editar Datos</title>
+  <link rel="stylesheet" href="stylesed.css">
+  <link rel="icon" href="/Imagenes/iconoo.png" type="image/png">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
-<body>
-    <h2>Editar Datos</h2>
-    <form action="/api/cliente/editar" method="POST">
-        <label for="cedula">Cédula:</label>
-        <input type="text" id="cedula" name="cedula" required><br><br>
+<body class="page-bg">
+  <header class="header-bar">
+    <h1 class="title">Editar Datos</h1>
+  </header>
 
-        <label for="nombre_completo">Nombre completo:</label>
-        <input type="text" id="nombre_completo" name="nombre_completo" required><br><br>
+  <main class="main-container">
+    <section class="form-card">
+      <form action="/api/cliente/editar" method="POST" class="veterinaria-form">
+        <div class="form-group">
+          <label for="cedula">Cédula:</label>
+          <input type="text" id="cedula" name="cedula" required>
+        </div>
 
-        <label for="usuario">Usuario:</label>
-        <input type="text" id="usuario" name="usuario" required><br><br>
+        <div class="form-group">
+          <label for="nombre_completo">Nombre completo:</label>
+          <input type="text" id="nombre_completo" name="nombre_completo" required>
+        </div>
 
-        <label for="correo">Correo:</label>
-        <input type="email" id="correo" name="correo" required><br><br>
+        <div class="form-group">
+          <label for="usuario">Usuario:</label>
+          <input type="text" id="usuario" name="usuario" required>
+        </div>
 
-        <label for="telefono">Teléfono:</label>
-        <input type="text" id="telefono" name="telefono" required><br><br>
+        <div class="form-group">
+          <label for="correo">Correo:</label>
+          <input type="email" id="correo" name="correo" required>
+        </div>
 
-        <label for="direccion">Dirección:</label>
-        <input type="text" id="direccion" name="direccion" required><br><br>
+        <div class="form-group">
+          <label for="telefono">Teléfono:</label>
+          <input type="text" id="telefono" name="telefono" required>
+        </div>
 
-        <button type="submit">Guardar Cambios</button>
-    </form>
+        <div class="form-group">
+          <label for="direccion">Dirección:</label>
+          <input type="text" id="direccion" name="direccion" required>
+        </div>
 
-    <script>
-        // Cargar datos del cliente al abrir la página
-        fetch("/api/cliente")
-            .then(res => {
-                if (!res.ok) throw new Error("No se pudo obtener datos del cliente");
-                return res.json();
-            })
-            .then(cliente => {
-                document.getElementById("cedula").value = cliente.cedula;
-                document.getElementById("nombre_completo").value = cliente.nombre_completo;
-                document.getElementById("usuario").value = cliente.usuario;
-                document.getElementById("correo").value = cliente.correo;
-                document.getElementById("telefono").value = cliente.telefono;
-                document.getElementById("direccion").value = cliente.direccion;
-            })
-            .catch(err => {
-                Swal.fire({
-                    icon: "error",
-                    title: "Veterinaria UC",
-                    text: "❌ Error al cargar datos del cliente",
-                }).then(() => window.location.href = "/menus/usuario.html");
-            });
-    </script>
+        <div class="form-actions">
+          <button type="button" class="btn-secondary" onclick="window.location.href='/menus/usuario.html'"> Regresar</button>
+          <button type="submit" class="btn-primary"> Guardar Cambios</button>
+        </div>
+      </form>
+    </section>
+  </main>
+
+  <script>
+    fetch("/api/cliente")
+      .then(res => {
+        if (!res.ok) throw new Error("No se pudo obtener datos del cliente");
+        return res.json();
+      })
+      .then(cliente => {
+        document.getElementById("cedula").value = cliente.cedula;
+        document.getElementById("nombre_completo").value = cliente.nombre_completo;
+        document.getElementById("usuario").value = cliente.usuario;
+        document.getElementById("correo").value = cliente.correo;
+        document.getElementById("telefono").value = cliente.telefono;
+        document.getElementById("direccion").value = cliente.direccion;
+      })
+      .catch(() => {
+        Swal.fire({
+          icon: "error",
+          title: "Veterinaria UC",
+          text: "❌ Error al cargar datos del cliente",
+        }).then(() => window.location.href = "/menus/usuario.html");
+      });
+  </script>
 </body>
 </html>
