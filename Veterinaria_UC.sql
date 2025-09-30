@@ -196,3 +196,10 @@ ADD FOREIGN KEY (id_veterinario) REFERENCES empleados(id_empleado);
 SELECT * FROM mascotas;
 
 ALTER TABLE mascotas CHANGE tamaño tamano ENUM('Pequeño', 'Mediano', 'Grande') NOT NULL;
+
+
+select * from clientes;
+
+select * from empleados;
+
+SELECT * FROM mascotas;
