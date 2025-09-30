@@ -18,6 +18,70 @@ const transporter = nodemailer.createTransport({
   }
 });
 
+// Función para enviar correo de bienvenida
+async function enviarCorreoBienvenida(correo, nombreCompleto, tipoUsuario) {
+  try {
+    // Determinar el rol en español
+    let rolTexto = "cliente";
+    if (tipoUsuario === "veterinario") {
+      rolTexto = "veterinario";
+    } else if (tipoUsuario === "administrador" || tipoUsuario === "admin") {
+      rolTexto = "administrador";
+    }
+
+    // Crear el HTML del correo con el formato proporcionado
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html lang="es">
+      <head>
+        <meta charset="UTF-8">
+        <style>
+          body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+          }
+          .emoji {
+            font-size: 1.2em;
+          }
+          .highlight {
+            font-weight: bold;
+          }
+          .signature {
+            color: #666;
+            margin-top: 20px;
+          }
+        </style>
+      </head>
+      <body>
+        <h2>Hola ${nombreCompleto} <span class="emoji">🐾</span></h2>
+        
+        <p>¡Gracias por registrarte como <span class="highlight">${rolTexto}</span> en <span class="highlight">Veterinaria UC</span>!</p>
+        
+        <p>Estamos felices de tenerte con nosotros.</p>
+        <p>Esperamos que disfrutes de nuestros servicios y que tu experiencia sea maravillosa.</p>
+        
+        <p class="signature">— El equipo de Veterinaria UC 💚</p>
+      </body>
+      </html>
+    `;
+
+    // Enviar el correo
+    await transporter.sendMail({
+      from: `"Veterinaria UC" <${process.env.MAIL_USER}>`,
+      to: correo,
+      subject: `¡Bienvenido a Veterinaria UC, ${nombreCompleto}!`,
+      html: htmlContent
+    });
+
+    console.log(`✅ Correo de bienvenida enviado a ${correo}`);
+    return true;
+  } catch (error) {
+    console.error("❌ Error enviando correo de bienvenida:", error);
+    throw error;
+  }
+}
+
 function enviarFacturaCita(correoDestino, datosFactura) {
   return new Promise((resolve, reject) => {
     const doc = new PDFDocument({ size: "A4", margin: 40 });
@@ -164,47 +228,23 @@ app.post("/registro", (req, res) => {
     `);
   }
 
-  const sql = `
-    INSERT INTO clientes
-    (cedula, nombre_completo, usuario, clave, correo, telefono, direccion)
-    VALUES (?, ?, ?, ?, ?, ?, ?)
+  // ✅ VALIDAR SI LA CÉDULA, CORREO O USUARIO YA EXISTEN
+  const sqlCheck = `
+    SELECT 
+      CASE 
+        WHEN cedula = ? THEN 'cédula'
+        WHEN correo = ? THEN 'correo'
+        WHEN usuario = ? THEN 'usuario'
+      END AS campo_duplicado
+    FROM clientes
+    WHERE cedula = ? OR correo = ? OR usuario = ?
+    LIMIT 1
   `;
 
-  db.query(
-    sql,
-    [cedula, nombre_completo, usuario, clave, correo, telefono || null, direccion || null],
-    async (err) => {
-      if (err) {
-        console.error("Error al registrar cliente:", err);
-        return res.status(500).send(`
-          <!DOCTYPE html>
-          <html lang="es">
-          <head>
-            <meta charset="UTF-8">
-            <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-          </head>
-          <body>
-            <script>
-              Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: 'No se pudo registrar el cliente. Intenta de nuevo.'
-              }).then(() => window.history.back());
-            </script>
-          </body>
-          </html>
-        `);
-      }
-
-      // Enviar correo de bienvenida (no detiene el flujo si falla)
-      try {
-        await enviarCorreoBienvenida(correo, nombre_completo, "cliente");
-      } catch (e) {
-        console.error("Error enviando correo de bienvenida:", e);
-      }
-
-      // ✅ Mensaje emergente de éxito
-      res.send(`
+  db.query(sqlCheck, [cedula, correo, usuario, cedula, correo, usuario], (err, rows) => {
+    if (err) {
+      console.error("Error al verificar duplicados:", err);
+      return res.status(500).send(`
         <!DOCTYPE html>
         <html lang="es">
         <head>
@@ -214,19 +254,104 @@ app.post("/registro", (req, res) => {
         <body>
           <script>
             Swal.fire({
-              icon: 'success',
-              title: '¡Registro exitoso!',
-              text: 'El cliente ha sido registrado',
-              confirmButtonText: 'Aceptar'
-            }).then(() => {
-              window.location.href = '/index.html'; // o la ruta que prefieras
-            });
+              icon: 'error',
+              title: 'Error',
+              text: 'Error en el servidor. Intenta de nuevo.'
+            }).then(() => window.history.back());
           </script>
         </body>
         </html>
       `);
     }
-  );
+
+    // Si encuentra algún registro duplicado
+    if (rows.length > 0) {
+      const campoDuplicado = rows[0].campo_duplicado;
+      return res.status(400).send(`
+        <!DOCTYPE html>
+        <html lang="es">
+        <head>
+          <meta charset="UTF-8">
+          <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        </head>
+        <body>
+          <script>
+            Swal.fire({
+              icon: 'error',
+              title: 'Dato duplicado',
+              text: 'La ${campoDuplicado} ya está registrada en el sistema'
+            }).then(() => window.history.back());
+          </script>
+        </body>
+        </html>
+      `);
+    }
+
+    // ✅ Si no hay duplicados, proceder con el registro
+    const sql = `
+      INSERT INTO clientes
+      (cedula, nombre_completo, usuario, clave, correo, telefono, direccion)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+    `;
+
+    db.query(
+      sql,
+      [cedula, nombre_completo, usuario, clave, correo, telefono || null, direccion || null],
+      async (err) => {
+        if (err) {
+          console.error("Error al registrar cliente:", err);
+          return res.status(500).send(`
+            <!DOCTYPE html>
+            <html lang="es">
+            <head>
+              <meta charset="UTF-8">
+              <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+            </head>
+            <body>
+              <script>
+                Swal.fire({
+                  icon: 'error',
+                  title: 'Error',
+                  text: 'No se pudo registrar el cliente. Intenta de nuevo.'
+                }).then(() => window.history.back());
+              </script>
+            </body>
+            </html>
+          `);
+        }
+
+        // Enviar correo de bienvenida
+        try {
+          await enviarCorreoBienvenida(correo, nombre_completo, "cliente");
+        } catch (e) {
+          console.error("Error enviando correo de bienvenida:", e);
+        }
+
+        // ✅ Mensaje emergente de éxito
+        res.send(`
+          <!DOCTYPE html>
+          <html lang="es">
+          <head>
+            <meta charset="UTF-8">
+            <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+          </head>
+          <body>
+            <script>
+              Swal.fire({
+                icon: 'success',
+                title: '¡Registro exitoso!',
+                text: 'El cliente ha sido registrado',
+                confirmButtonText: 'Aceptar'
+              }).then(() => {
+                window.location.href = '/index.html';
+              });
+            </script>
+          </body>
+          </html>
+        `);
+      }
+    );
+  });
 });
 
 // ------------------- LOGIN -------------------
@@ -812,59 +937,71 @@ app.get("/api/mis-mascotas", (req, res) => {
     });
 });
 
-// ------------------- REGISTRO EMPLEADOS (admin crea veterinarios o admins) -------------------
-app.post("/registro_empleado", (req, res) => {
-    const { nombre_completo, usuario, clave, correo, telefono, id_rol, especialidad } = req.body;
+// ---------------- REGISTRO DE EMPLEADOS ----------------
 
+app.post("/registro_empleado", (req, res) => {
+  const { nombre_completo, usuario, clave, correo, telefono, id_rol, especialidad } = req.body;
+
+  // ✅ Verificar duplicados en empleados
+  const sqlCheck = `
+    SELECT 
+      CASE 
+        WHEN correo = ? THEN 'correo'
+        WHEN usuario = ? THEN 'usuario'
+      END AS campo_duplicado
+    FROM empleados
+    WHERE correo = ? OR usuario = ?
+    LIMIT 1
+  `;
+
+  db.query(sqlCheck, [correo, usuario, correo, usuario], (err, rows) => {
+    if (err) {
+      console.error("Error al verificar duplicados:", err);
+      return res.status(500).json({
+        success: false,
+        message: "Error en el servidor."
+      });
+    }
+
+    if (rows.length > 0) {
+      const campoDuplicado = rows[0].campo_duplicado;
+      return res.status(400).json({
+        success: false,
+        message: `El ${campoDuplicado} ya está registrado en el sistema`
+      });
+    }
+
+    // Continuar con el INSERT original...
     const sql = `
-        INSERT INTO empleados 
-        (nombre_completo, usuario, clave, correo, telefono, id_rol, especialidad)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO empleados 
+      (nombre_completo, usuario, clave, correo, telefono, id_rol, especialidad)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
     `;
 
     db.query(sql, [nombre_completo, usuario, clave, correo, telefono, id_rol, especialidad || null], async (err) => {
-        if (err) {
-            console.error("❌ Error al registrar empleado:", err);
-            return res.send(`
-                <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-                <script>
-                  Swal.fire({
-                    icon: 'error',
-                    title: 'Veterinaria UC',
-                    text: 'No se pudo registrar el empleado. Intenta de nuevo.',
-                    confirmButtonText: 'Volver'
-                  }).then(() => window.history.back());
-                </script>
-            `);
-        }
+      if (err) {
+        console.error("Error al registrar empleado:", err);
+        return res.status(500).json({
+          success: false,
+          message: "No se pudo registrar el empleado."
+        });
+      }
 
-        // ✅ Enviar correo de bienvenida según el rol
-        try {
-            let rolTexto = "empleado";
-            if (id_rol == 2) rolTexto = "veterinario";
-            if (id_rol == 1) rolTexto = "administrador";
+      try {
+        let rolTexto = "empleado";
+        if (id_rol == 2) rolTexto = "veterinario";
+        if (id_rol == 1) rolTexto = "administrador";
+        await enviarCorreoBienvenida(correo, nombre_completo, rolTexto);
+      } catch (e) {
+        console.error("Error enviando correo:", e);
+      }
 
-            await enviarCorreoBienvenida(correo, nombre_completo, rolTexto);
-            console.log(`Correo de bienvenida enviado a ${correo}`);
-        } catch (e) {
-            console.error("Error enviando correo de bienvenida:", e);
-        }
-
-        // ✅ Mensaje emergente de éxito
-        res.send(`
-            <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-            <script>
-              Swal.fire({
-                icon: 'success',
-                title: 'Veterinaria UC',
-                text: 'Empleado registrado y correo de bienvenida enviado',
-                confirmButtonText: 'Aceptar'
-              }).then(() => {
-                window.location.href = '/menus/admin.html';
-              });
-            </script>
-        `);
+      res.status(200).json({
+        success: true,
+        message: "Empleado registrado con éxito"
+      });
     });
+  });
 });
 
 // ------------------- CONSULTAR CLIENTE Y MASCOTAS POR CÉDULA -------------------
@@ -977,10 +1114,6 @@ app.get("/citas_pendientes", (req, res) => {
         }
         res.json({ success: true, citas: rows });
     });
-});
-
-app.listen(PORT, () => {
-    console.log(`🚀 Servidor escuchando en http://localhost:${PORT}`);
 });
 
 // ------------------- CERRAR SESIÓN -------------------

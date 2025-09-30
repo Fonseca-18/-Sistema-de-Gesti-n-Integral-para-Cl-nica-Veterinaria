@@ -34,7 +34,7 @@
 
       <div class="form-group">
         <label for="correo">Correo:</label>
-        <input type="email" id="correo" name="correo">
+        <input type="email" id="correo" name="correo" required>
       </div>
 
       <div class="form-group">
@@ -45,7 +45,7 @@
       <div class="form-group">
         <label for="id_rol">Rol:</label>
         <select id="id_rol" name="id_rol" required>
-          <option value=""> Seleccione </option>
+          <option value="">Seleccione</option>
           <option value="1">Admin</option>
           <option value="2">Veterinario</option>
         </select>
@@ -57,7 +57,7 @@
       </div>
 
       <div class="form-actions">
-        <a href="javascript:history.back()" class="btn-secondary"> Regresar</a>    
+        <a href="javascript:history.back()" class="btn-secondary">Regresar</a>    
         <button type="submit" class="btn-primary">Registrar Empleado</button>
       </div>
 
@@ -85,20 +85,20 @@
           Swal.fire({
             icon: 'success',
             title: 'Veterinaria UC',
-            text: '✅ Empleado registrado con éxito',
+            text: json.message,
             confirmButtonText: 'Ir al menú'
           }).then(() => window.location.href = '/menus/admin.html');
         } else {
           Swal.fire({
             icon: 'error',
-            title: 'Error',
-            text: json.message || '❌ Error al registrar empleado'
+            title: 'Error al registrar',
+            text: json.message
           });
         }
-      } catch {
+      } catch (error) {
         Swal.fire({
           icon: 'error',
-          title: 'Error',
+          title: 'Error de conexión',
           text: 'No se pudo conectar con el servidor'
         });
       }
