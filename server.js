@@ -983,28 +983,6 @@ app.listen(PORT, () => {
     console.log(`🚀 Servidor escuchando en http://localhost:${PORT}`);
 });
 
-// ------------------- CANCELAR CITA -------------------
-app.delete("/api/citas/:id", (req, res) => {
-  if (!req.session.id_cliente) {
-    return res.status(401).json({ error: "No has iniciado sesión" });
-  }
-
-  const idCita = req.params.id;
-
-  // Solo permitir borrar citas del cliente logueado
-  const sql = "DELETE FROM citas WHERE id_cita = ? AND id_cliente = ?";
-  db.query(sql, [idCita, req.session.id_cliente], (err, result) => {
-    if (err) {
-      console.error("❌ Error al cancelar cita:", err);
-      return res.status(500).json({ error: "Error al cancelar la cita" });
-    }
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ error: "Cita no encontrada o no autorizada" });
-    }
-    res.json({ message: "✅ Cita cancelada con éxito" });
-  });
-});
-
 // ------------------- CERRAR SESIÓN -------------------
 app.get("/logout", (req, res) => {
   req.session.destroy((err) => {
@@ -1017,6 +995,241 @@ app.get("/logout", (req, res) => {
     // Redirige al login o a la página principal
     res.redirect("/login.html");
   });
+});
+
+// ------------------- CANCELAR CITA -------------------
+app.delete("/api/citas/:id", (req, res) => {
+  if (!req.session.id_cliente) {
+    return res.status(401).json({ error: "No has iniciado sesión" });
+  }
+
+  const idCita = req.params.id;
+
+  // 🔎 Buscar los datos de la cita antes de eliminarla
+  const sqlDatos = `
+    SELECT c.id_cita,
+           cl.nombre_completo AS cliente, cl.correo,
+           m.nombre AS mascota,
+           s.nombre_servicio AS servicio,
+           e.nombre_completo AS veterinario,
+           DATE_FORMAT(c.fecha_hora, '%Y-%m-%d') AS fecha,
+           DATE_FORMAT(c.fecha_hora, '%H:%i') AS hora
+    FROM citas c
+    INNER JOIN clientes cl ON c.id_cliente = cl.id_cliente
+    INNER JOIN mascotas m ON c.id_mascota = m.id_mascota
+    INNER JOIN servicios s ON c.id_servicio = s.id_servicio
+    INNER JOIN empleados e ON c.id_veterinario = e.id_empleado
+    WHERE c.id_cita = ? AND c.id_cliente = ?
+  `;
+
+  db.query(sqlDatos, [idCita, req.session.id_cliente], (err, rows) => {
+    if (err) {
+      console.error("❌ Error buscando cita:", err);
+      return res.status(500).json({ error: "Error en el servidor" });
+    }
+
+    if (rows.length === 0) {
+      return res.status(404).json({ error: "Cita no encontrada o no autorizada" });
+    }
+
+    const cita = rows[0];
+
+    // ❌ Eliminar la cita
+    const sqlDelete = "DELETE FROM citas WHERE id_cita = ? AND id_cliente = ?";
+    db.query(sqlDelete, [idCita, req.session.id_cliente], async (err2) => {
+      if (err2) {
+        console.error("❌ Error cancelando cita:", err2);
+        return res.status(500).json({ error: "No se pudo cancelar la cita" });
+      }
+
+      // 📧 Enviar correo de cancelación
+      try {
+        await transporter.sendMail({
+          from: `"Veterinaria UC" <${process.env.MAIL_USER}>`,
+          to: cita.correo,
+          subject: `Cita cancelada - ${cita.mascota}`,
+          html: `
+            <h2>Hola ${cita.cliente},</h2>
+            <p>Te confirmamos que tu cita ha sido <b style="color:red;">cancelada</b>.</p>
+            <ul>
+              <li><b>Mascota:</b> ${cita.mascota}</li>
+              <li><b>Servicio:</b> ${cita.servicio}</li>
+              <li><b>Veterinario:</b> ${cita.veterinario}</li>
+              <li><b>Fecha:</b> ${cita.fecha}</li>
+              <li><b>Hora:</b> ${cita.hora}</li>
+            </ul>
+            <p>Si deseas reprogramar, por favor agenda una nueva cita desde nuestra plataforma.</p>
+            <p>Saludos,<br><b>Veterinaria UC</b></p>
+          `
+        });
+
+        console.log(`📧 Correo de cancelación enviado a ${cita.correo}`);
+      } catch (e) {
+        console.error("❌ Error enviando correo de cancelación:", e);
+      }
+
+      res.json({ message: "Cita cancelada correctamente" });
+    });
+  });
+});
+
+// === Chatbot ===
+app.post("/chatbot", (req, res) => {
+  const { message } = req.body;
+
+  // Normalizar: minúsculas y quitar acentos
+  const msg = message
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+
+  let reply =
+    "No entendí tu pregunta 😅. Puedes preguntar sobre: registrar mascotas, agendar o consultar citas, editar datos, horarios, soporte o cerrar sesión.";
+
+  // === SALUDO ===
+  if (msg.includes("hola") || msg.includes("buenas") || msg.includes("saludos")) {
+    reply =
+      "¡Hola! 👋 Soy tu asistente virtual de Veterinaria UC 🐾. Puedo ayudarte con registro de mascotas, citas, datos personales y más. ¿Qué necesitas?";
+  }
+
+  // === REGISTRAR MASCOTA ===
+  else if (
+    msg.includes("registrar mascota") ||
+    msg.includes("como registro una mascota") ||
+    msg.includes("como registro a mi mascota") ||
+    msg.includes("donde registro mi mascota") ||
+    msg.includes("quiero registrar una mascota") ||
+    msg.includes("agregar mascota") ||
+    msg.includes("añadir mascota") ||
+    msg.includes("meter mascota") ||
+    msg.includes("nueva mascota")
+  ) {
+    reply =
+      "🐶 Para registrar una mascota:\n1. Entra al menú 'Registrar Mascota'.\n2. Completa nombre, especie, raza, edad y características.\n3. Haz clic en 'Guardar'.\n⚠️ Si dejas campos vacíos, el sistema no permitirá avanzar.";
+  }
+
+  // === AGENDAR CITA ===
+  else if (
+    msg.includes("agendar cita") ||
+    msg.includes("quiero una cita") ||
+    msg.includes("reservar cita") ||
+    msg.includes("como saco cita") ||
+    msg.includes("pedir cita") ||
+    msg.includes("hacer cita") ||
+    msg.includes("programar cita")
+  ) {
+    reply =
+      "📅 Para agendar una cita:\n1. Ingresa al menú 'Agendar Cita'.\n2. Selecciona tu mascota.\n3. Elige fecha y hora disponibles.\n4. Confirma la cita.\n⚠️ No se permiten fechas pasadas ni horarios ya ocupados.";
+  }
+
+  // === CONSULTAR CITA ===
+  else if (
+    msg.includes("consultar cita") ||
+    msg.includes("ver mis citas") ||
+    msg.includes("donde veo mis citas") ||
+    msg.includes("quiero revisar mis citas") ||
+    msg.includes("estado de mi cita") ||
+    msg.includes("historial de citas")
+  ) {
+    reply =
+      "🔍 Para consultar tus citas:\n1. Ingresa a 'Consultar Cita'.\n2. Verás fecha, hora, mascota y estado (pendiente, confirmada o atendida).\n3. Puedes filtrar por mascota o estado.";
+  }
+
+  // === EDITAR DATOS PERSONALES ===
+  else if (
+    msg.includes("editar datos personales") ||
+    msg.includes("cambiar mis datos") ||
+    msg.includes("modificar mi informacion") ||
+    msg.includes("actualizar mis datos") ||
+    msg.includes("cambiar correo") ||
+    msg.includes("cambiar telefono")
+  ) {
+    reply =
+      "✏️ Para editar tus datos personales:\n1. Ve al menú 'Editar Datos Personales'.\n2. Cambia lo que necesites (nombre, correo, teléfono).\n3. Guarda los cambios.\n⚠️ Si eliminas correo o teléfono, puede afectar la comunicación de citas.";
+  }
+
+  // === EDITAR DATOS DE LA MASCOTA ===
+  else if (
+    msg.includes("editar mascota") ||
+    msg.includes("editar datos de mi mascota") ||
+    msg.includes("cambiar datos mascota") ||
+    msg.includes("modificar mascota") ||
+    msg.includes("actualizar mascota")
+  ) {
+    reply =
+      "🐾 Para editar los datos de tu mascota:\n1. Ingresa a 'Editar Datos de la Mascota'.\n2. Cambia la información que quieras.\n3. Guarda los cambios.\n⚠️ El sistema debería impedir valores inválidos, como edad negativa.";
+  }
+
+  // === CERRAR SESIÓN ===
+  else if (
+    msg.includes("cerrar sesion") ||
+    msg.includes("logout") ||
+    msg.includes("salir de la cuenta") ||
+    msg.includes("terminar sesion")
+  ) {
+    reply =
+      "🚪 Para cerrar sesión, haz clic en el botón 'Cerrar Sesión' en la parte inferior del menú. ⚠️ Si cierras sin guardar, los cambios se perderán.";
+  }
+
+  // === HORARIO DE ATENCIÓN ===
+  else if (
+    msg.includes("horario") ||
+    msg.includes("atencion") ||
+    msg.includes("a que hora abren") ||
+    msg.includes("cuando atienden") ||
+    msg.includes("dias de servicio")
+  ) {
+    reply =
+      "⏰ Nuestro horario es:\n- Lunes a viernes: 9:00 a 18:00\n- Sábados: 9:00 a 13:00\n⚠️ El sistema no permite agendar citas fuera de este horario.";
+  }
+
+  // === CONTACTO / SOPORTE ===
+  else if (
+    msg.includes("contacto") ||
+    msg.includes("ayuda") ||
+    msg.includes("soporte") ||
+    msg.includes("hablar con alguien") ||
+    msg.includes("problema con el sistema")
+  ) {
+    reply =
+      "📧 Para ayuda, escribe a veterinariauc@gmail.com o llama al 📞 555-123-456.\nSi es un problema técnico, describe qué estabas haciendo cuando ocurrió.";
+  }
+
+  // === ERRORES COMUNES ===
+  else if (
+    msg.includes("que pasa si registro dos veces la misma mascota") ||
+    msg.includes("duplicado mascota") ||
+    msg.includes("registrar mascota repetida")
+  ) {
+    reply =
+      "⚠️ Actualmente el sistema no valida duplicados estrictamente. Es posible registrar dos veces la misma mascota si usas datos diferentes. Lo recomendable es revisar bien antes de guardar.";
+  } else if (
+    msg.includes("que pasa si agendo dos citas a la misma hora") ||
+    msg.includes("cita duplicada") ||
+    msg.includes("doble cita")
+  ) {
+    reply =
+      "⚠️ El sistema debería evitar que la misma mascota tenga dos citas en la misma fecha y hora. Si lo permite, sería un error de validación en la lógica.";
+  } else if (
+    msg.includes("que pasa si pongo la edad negativa") ||
+    msg.includes("edad incorrecta") ||
+    msg.includes("dato invalido")
+  ) {
+    reply =
+      "⚠️ El sistema debería validar que la edad de la mascota sea un número positivo. Si te deja guardar un valor inválido, es un error de programación.";
+  }
+
+  // === DESPEDIDA ===
+  else if (
+    msg.includes("gracias") ||
+    msg.includes("muchas gracias") ||
+    msg.includes("hasta luego")
+  ) {
+    reply =
+      "¡Con gusto! 😄 Estoy aquí para ayudarte siempre. ¡Hasta luego!";
+  }
+
+  res.json({ reply });
 });
 
 // ------------------- INICIO SERVIDOR -------------------

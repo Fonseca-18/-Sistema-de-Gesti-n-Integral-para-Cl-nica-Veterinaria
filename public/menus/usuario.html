@@ -61,5 +61,54 @@
         .catch(err => console.error("Error al cerrar sesión:", err));
     });
   </script>
+
+    <!-- Chatbot flotante -->
+<div id="chatbot">
+  <div id="chatbot-header">🤖 Asistente UC</div>
+  <div id="chatbot-body"></div>
+  <div id="chatbot-footer">
+    <input type="text" id="chatbot-input" placeholder="Escribe tu mensaje..." />
+    <button id="chatbot-send">➤</button>
+  </div>
+</div>
+
+<script>
+  const body = document.getElementById("chatbot-body");
+  const input = document.getElementById("chatbot-input");
+  const send = document.getElementById("chatbot-send");
+
+  function addMessage(text, sender) {
+    const msg = document.createElement("div");
+    msg.className = sender === "user" ? "msg user" : "msg bot";
+    msg.innerText = text;
+    body.appendChild(msg);
+    body.scrollTop = body.scrollHeight;
+  }
+
+  async function sendMessage() {
+    const text = input.value.trim();
+    if (!text) return;
+    addMessage(text, "user");
+    input.value = "";
+
+    try {
+      const res = await fetch("/chatbot", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: text })
+      });
+      const data = await res.json();
+      addMessage(data.reply, "bot");
+    } catch (e) {
+      addMessage("❌ Error al conectar con el servidor", "bot");
+    }
+  }
+
+  send.addEventListener("click", sendMessage);
+  input.addEventListener("keypress", e => {
+    if (e.key === "Enter") sendMessage();
+  });
+</script>
+
 </body>
 </html>
